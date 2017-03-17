@@ -1,0 +1,41 @@
+header, nav {
+	display: block;
+}
+
+.header__logo {
+	background-image: url("../images/logo.gif");
+	background-repeat: no-repeat;
+	background-color: white;
+	width: 210px;
+	margin-top: 5px;
+	height: 31px;
+    background-size: 100%;
+}
+
+.header__menu {
+	height: auto!important;
+}
+
+.dropdown-replace {
+	background: url("../images/dropdown-replace.gif");
+	background-repeat: no-repeat;
+	display: block!important;
+	width: 10px;
+	height: 5px;
+	margin-top: 5px;
+	margin-bottom: -5px;
+}
+
+.search-replace {
+	background: url("../images/search-replace.gif");
+	background-repeat: no-repeat;
+	display: block!important;
+	width: 18px;
+	height: 18px;
+	margin-top: 6px;
+	margin-bottom: -6px;
+}
+
+.menu ul li {
+	display: inline;
+}
