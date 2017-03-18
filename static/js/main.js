@@ -538,14 +538,24 @@ function renderMarkers(){
 
                                 var ids = [];
                                 for(var j=0; j<c[i].s.length; j++){
-                                    ids.push(arrayObjectIndexOf(c,c[i].s[j],"id"));
+                                    ids.push(c[i].s[j]);
                                 }
+
                                  $.ajax({
                                     type: "GET",
                                     url: "q/get_jobs/"+ids,
                                     success: function(response) {
                                         $.each( response, function( key, val ) {
-                                            content += '<span id="job'+val.id+'">'+val.title+'</span><hr/>';
+                                            var points_arr_id = arrayObjectIndexOf(points_to_child,val.id,"id");
+                                            if(points_arr_id >= 0){
+                                                content += '<span id="job'+val.id+'" style="color:'+points_to_child[points_arr_id].color+'">'+val.title+'</span><hr/>';
+                                            } else {
+                                                content += '<span id="job'+val.id+'">'+val.title+'</span><hr/>';
+                                            }
+
+
+
+
                                         });
                                         infoWindow.setContent(content);
                                         infoWindow.open(map, marker);
@@ -560,17 +570,19 @@ function renderMarkers(){
 
                         }
                     });
-
 	            }
 	        })(marker, i));
 			markers.push(marker);
 
 		}
 	}
-
+    $("#job"+16).css("color","green");
    markerCluster = new MarkerClusterer(map, markers, cluster_options);
 }
 
+function test1(){
+
+}
 /*
 #    Search, order and filter functions   #
  */
@@ -1114,6 +1126,8 @@ function restoreJobRanking(){
                     fillOpacity: 1
 		});
 	}
+
+    points_to_child = [];
 }
 
 function jobRankingDelayed(){
@@ -1220,13 +1234,14 @@ function jobRanking(){
 
     for(var i=0; i<data.length; i++){
         var childs = hasChildrens(data[i].id);
-        if(childs){
-            childs.forEach(function(child){
-                console.log(child);
-            });
+        var is_child = isChild(data[i].id);
+        if(childs || is_child){
+            points_to_child.push({id: data[i].id, points: data[i].points});
+        } else {
+            var mid = arrayObjectIndexOf(markers,data[i].id,"job_id");
+            markers[mid].points = data[i].points;
         }
-        var mid = arrayObjectIndexOf(markers,data[i].id,"job_id");
-        markers[mid].points = data[i].points;
+
     }
 
     rateMarkers();
@@ -1234,53 +1249,12 @@ function jobRanking(){
 
 function hasChildrens(cid){
     var c_array_id = arrayObjectIndexOf(c,cid,"id");
-    if(typeof c[c_array_id].s === "object"){
-        return c[c_array_id].s;
-    } else {
-        return false;
-    }
+    return typeof c[c_array_id].s === "object";
 }
 
-function scaleDownValues2(){
-	var min = 10,
-		max = 100,
-		ratio;
-    var smin = 6, smax = 12, sratio;
-
-	var data = [];
-	for(var i=0; i<markers.length; i++){
-		if(markers[i].hasOwnProperty("points")){
-			data.push({id: i, points: markers[i].points});
-		}
-	}
-
-	var max_value = Math.max.apply(Math,data.map(function(o){return o.points;})),
-		min_value = Math.min.apply(Math,data.map(function(o){return o.points;}));
-
-	ratio = (max - min)/(max_value - min_value);
-    sratio = (smax - smin)/(max_value - min_value);
-
-	for(var i=0; i<data.length; i++){
-		var value = min + ratio * (data[i].points - min_value);
-		var mid = data[i].id;
-        /*var jid = markers[mid].job_id
-        var job_arr_id = arrayObjectIndexOf(j,jid.toString(),"id");*/
-		var color = rgb2hex(valueToColor(value));
-
-		var scale_value = smin + sratio * (data[i].points - min_value);
-		markers[mid].setIcon(
-			{
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: scale_value,
-                strokeColor: color,
-                strokeOpacity: 0.2,
-                strokeWeight: 12,
-                fillColor: color,
-                fillOpacity: 1
-            }
-		);
-        //markers[mid].set('labelContent', j[job_arr_id].salary_from + "-" + j[job_arr_id].salary_to +" €");
-	}
+function isChild(cid){
+    var c_array_id = arrayObjectIndexOf(c,cid,"id");
+    return typeof c[c_array_id].s !== "object" && typeof c[c_array_id].s !== "string";
 }
 
 function rateMarkers(){
@@ -1316,6 +1290,14 @@ function scaleDownValues(){
 		}
 	}
 
+    for(var i=0; i<points_to_child.length; i++){
+		if(points_to_child[i].hasOwnProperty("points")){
+			data.push({id: points_to_child[i].id, points: points_to_child[i].points, not_marker: true});
+		}
+	}
+
+    console.log(data);
+
 	var max_value = Math.max.apply(Math,data.map(function(o){return o.points;})),
 		min_value = Math.min.apply(Math,data.map(function(o){return o.points;}));
 
@@ -1330,17 +1312,23 @@ function scaleDownValues(){
 		var color = rgb2hex(valueToColor(value));
 
 		var scale_value = smin + sratio * (data[i].points - min_value);
-		markers[mid].setIcon(
-			{
-                path: google.maps.SymbolPath.CIRCLE,
-                scale: scale_value,
-                strokeColor: color,
-                strokeOpacity: 0.2,
-                strokeWeight: 12,
-                fillColor: color,
-                fillOpacity: 1
-            }
-		);
+        if(data[i].hasOwnProperty("not_marker")){
+            var id = arrayObjectIndexOf(points_to_child,data[i].id,"id");
+            points_to_child[id].color = color;
+        } else {
+            markers[mid].setIcon(
+                {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: scale_value,
+                    strokeColor: color,
+                    strokeOpacity: 0.2,
+                    strokeWeight: 12,
+                    fillColor: color,
+                    fillOpacity: 1
+                }
+            );
+        }
+
         //markers[mid].set('labelContent', j[job_arr_id].salary_from + "-" + j[job_arr_id].salary_to +" €");
 	}
 }
