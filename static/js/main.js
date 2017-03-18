@@ -1,7 +1,14 @@
 /*
 TODO: pagination works bad
-TODO: ne rabotaet ranzhirovanie s 'plus' metkami;
  */
+'use strict';
+var CVMaps = {
+  paths: {
+      h: document.URL.substr(0,document.URL.lastIndexOf('/')) + "/",
+      s: function(){return this.h + "static/"},
+      i: function(){return this.s() + "images/"}
+  }
+};
 var map, markers = [], markerCluster = {};
 var _p = 1,
     _qt = 0,
@@ -27,18 +34,17 @@ var param = {
    jobs: 0
 };
 var dp = []; // downloaded pages
-var pr = {}; // job preview cache
 var home_marker = [];
 var home_radius = [];
 var set_home_position;
 var search_radius = 2000;
 var cluster_options = {
-    imagePath: 'http://localhost/cvm/static/images/m',
-    gridSize: 50,
+    imagePath: CVMaps.paths.i()+'m',
+    gridSize: 40,
     maxZoom: 15
 };
 
-var points_to_child = [];
+var children = [];
 
 /*
     Load homepage parameters and load up jobs list
@@ -54,18 +60,6 @@ function initParam(){
     $.ajax({
         type: "GET",
         url: "q/init_param/"+_p+"/"+_qt+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        /*url: "q/init_param/",
-        data: {
-            p: _p,
-            qt: _qt,
-            order_by: _order_by,
-            city_id: _city_id,
-            category_id: _category_id,
-            edu_id: _edu_id,
-            salary: _salary,
-            new: _new,
-            premium: _premium
-        },*/
         success: function(p){
             param.jobs = p.jobs;
         },
@@ -80,11 +74,12 @@ function initList() {
     $('.window__list').animate({
         scrollTop: 0
     }, 300);
-    var start = (_p-1) * 30;
+    var start = (_p-1) * 30,
+        end;
     if(param.jobs < 30){
-        var end = (start + param.jobs);
+        end = (start + param.jobs);
     } else {
-        var end = (start + 30);
+        end = (start + 30);
     }
 
     // vycheslenie kol-vo objavlenij na poslednej stranice
@@ -99,16 +94,43 @@ function initList() {
 
     if(typeof j !== "undefined") {
         for (var i = start; i < end; i++) {
-            var salary = "";
-            if (j[i].salary_from !== null && j[i].salary_to === null) {
-                salary += 'Nuo ' + j[i].salary_from;
-            } else if (j[i].salary_from === null && j[i].salary_to !== null) {
-                salary += 'Iki ' + j[i].salary_to;
-            } else if (j[i].salary_from !== null && j[i].salary_to !== null) {
-                salary += j[i].salary_from + " - " + j[i].salary_to;
-            }
-            salary += ' €';
+            var salary = salaryToString(j,i);
             list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="static/images/l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div></a></li>');
+        }
+    }
+    $("#pg-current").html(_p);
+
+}
+
+function initList2() {
+    $('.window__list').animate({
+        scrollTop: 0
+    }, 300);
+    var start = (_p-1) * 30,
+        end;
+    if(param.jobs < 30){
+        end = (start + param.jobs);
+    } else {
+        end = (start + 30);
+    }
+
+    // vycheslenie kol-vo objavlenij na poslednej stranice
+    if(_p == tp){
+        end = start + (param.jobs - (tp - 1) * 30);
+    }
+
+    $("#jobs-count").html(param.jobs);
+
+    var list = $(".window__list ul");
+    list.html("");
+
+    if(typeof j !== "undefined") {
+        for (var i = 0; i < j.length; i++) {
+            if(j[i].hasOwnProperty("points")){
+                var salary = salaryToString(j,i);
+            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="static/images/l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div></a></li>');
+            }
+
         }
     }
     $("#pg-current").html(_p);
@@ -119,8 +141,8 @@ function initMap() {
 	var cvMapsStyle=new google.maps.StyledMapType([{featureType:"administrative",elementType:"labels.text.fill",stylers:[{color:"#444444"}]},{featureType:"administrative.country",elementType:"geometry.fill",stylers:[{visibility:"on"}]},{featureType:"administrative.province",elementType:"labels.icon",stylers:[{hue:"#ff0000"},{visibility:"on"}]},{featureType:"landscape",elementType:"all",stylers:[{color:"#f2f2f2"}]},{featureType:"poi",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.business",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.government",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.medical",elementType:"geometry",stylers:[{visibility:"on"},{color:"#f5e4e4"}]},{featureType:"poi.park",elementType:"geometry",stylers:[{visibility:"on"},{color:"#deefdd"}]},{featureType:"road",elementType:"all",stylers:[{saturation:-100},{lightness:45}]},{featureType:"road.highway",elementType:"all",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"geometry",stylers:[{visibility:"on"}]},{featureType:"road.highway",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#f8e491"}]},{featureType:"road.highway",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road.highway",elementType:"labels",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"labels.text.fill",stylers:[{visibility:"off"}]},{featureType:"road.highway.controlled_access",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"road.arterial",elementType:"labels.icon",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"transit.station",elementType:"all",stylers:[{visibility:"on"}]},{featureType:"water",elementType:"all",stylers:[{color:"#46bcec"},{visibility:"on"}]},{featureType:"water",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#78d2ff"}]}],{name:"CV Maps"});
 
 	map = new google.maps.Map(document.getElementById('map'), {
-		center: {lat: 55.1493051, lng: 24.2270266},
-		zoom: 8,
+		center: {lat: 54.694988, lng: 25.278570},
+		zoom: 12,
 		mapTypeControl: false,
         mapTypeControlOptions: {
             mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'cvmapsstyle']
@@ -145,25 +167,20 @@ function initMap() {
 }
 
 function initSearchBox(){
-// Create the search box and link it to the UI element.
-        var input = document.getElementById('pac-input');
-        var searchBox = new google.maps.places.SearchBox(input);
-
-        // Bias the SearchBox results towards current map's viewport.
-        map.addListener('bounds_changed', function() {
-          searchBox.setBounds(map.getBounds());
-        });
+    var input = document.getElementById('pac-input');
+    var searchBox = new google.maps.places.SearchBox(input);
+    map.addListener('bounds_changed', function() {
+        searchBox.setBounds(map.getBounds());
+    });
 
     searchBox.addListener('places_changed', function() {
-          var places = searchBox.getPlaces();
+        var places = searchBox.getPlaces();
 
-          if (places.length == 0) {
+        if (places.length == 0) {
             return;
-          }
+        }
 
-          // For each place, get the icon, name and location.
-          var bounds = new google.maps.LatLngBounds();
-          places.forEach(function(place) {
+        places.forEach(function(place) {
             if (!place.geometry) {
               console.log("Returned place contains no geometry");
               return;
@@ -171,220 +188,9 @@ function initSearchBox(){
 
             placeMarkerAndPanTo(place.geometry.location, map);
 
-          });
-
         });
-}
-
-/*
-    Funkcii dlia oboznachenija domashnego adresa nazhatiem na kartu
- */
-function enableSetHomePosition(){
-    set_home_position = map.addListener('click', function(e) {
-        placeMarkerAndPanTo(e.latLng, map);
     });
 }
-
-function disableSetHomePosition(){
-    google.maps.event.removeListener(set_home_position);
-}
-
-function placeMarkerAndPanTo(latLng, map) {
-    if(home_marker.length > 0){
-        home_marker[0].setMap(null);
-        home_marker = [];
-    }
-
-    if(home_radius.length > 0){
-        home_radius[0].setMap(null);
-        home_radius = [];
-    }
-
-    var marker = new google.maps.Marker({
-        position: {lat:latLng.lat() , lng:latLng.lng()},
-        draggable:true,
-        map: map
-    });
-
-    var radius = new google.maps.Circle({
-      strokeColor: '#666666',
-      strokeOpacity: 0.5,
-      strokeWeight: 2,
-      fillColor: '#000000',
-      fillOpacity: 0.05,
-      map: map,
-      center: new google.maps.LatLng(latLng.lat(), latLng.lng()),
-      radius: search_radius,
-        editable: true
-
-    });
-
-    google.maps.event.addListener(radius, 'radius_changed', function() {
-        search_radius = radius.getRadius();
-        findNearest(marker.getPosition().lat(),marker.getPosition().lng());
-    });
-
-    google.maps.event.addListener(radius, 'center_changed', function() {
-        marker.setPosition(radius.getCenter());
-        findNearest(radius.getCenter().lat(),radius.getCenter().lng());
-    });
-
-    google.maps.event.addListener(marker, 'dragend', function() {
-        radius.setCenter(marker.getPosition());
-        findNearest(marker.getPosition().lat(),marker.getPosition().lng());
-    });
-
-    map.panTo(latLng);
-    if(map.zoom < 13){
-        map.setZoom(13);
-    }
-
-    home_radius.push(radius);
-    home_marker.push(marker);
-
-    findNearest(latLng.lat(),latLng.lng());
-}
-
-
-/*
-    V locations, pervaja koordinata, eto ta, ot kotoroj schitaem (dom. adres).
-    Mapzen dejstvuet na ogranichenno rasstojanie ot tochek (~200km), poetomu snachalo nuzhno vybrat gorod.
- */
-function getDuration(origin){
-    var destinations = "";
-    var nearest_jobs = [];
-    for(var i=0; i< c.length; i++){
-        if(c[i].nearest === 1){
-            nearest_jobs.push({id: c[i].id});
-            destinations += '{"lat":'+c[i].lat
-                            +',"lon":'+c[i].lng+'}';
-            destinations += ',';
-        }
-    }
-
-    if(destinations.length > 0){
-        destinations = destinations.slice(0, -1);
-    } else {
-        console.log("No work here");
-        return;
-    }
-
-    $.ajax({
-      type: 'GET',
-      url: 'http://matrix.mapzen.com/one_to_many',
-        data: {
-            json: '{' +
-            '"locations":' +
-                '[{"lat":'+origin[0]+',"lon":'+origin[1]+'},'+destinations+'],' +
-            '"costing":' +
-                '"pedestrian",' +
-            '"api_key":' +
-                '"mapzen-cqWzJVB"' +
-            '}'
-        },
-      dataType: 'json',
-      success: function(jsonData) {
-          jQuery.each( jsonData.one_to_many[0], function( i, val ) {
-              if(val.to_index != 0){
-                  /* c[i-1] - t.k. koordinaty idut po ocheredi, a samyj pervyj - start, poetomu ejo
-                    ignoriruem (val.to_index != 0)
-                  */
-                  var id = arrayObjectIndexOf(j,nearest_jobs[i-1].id,"id");
-                  j[id].time = round((val.time/60),1);
-              }
-            });
-
-      },
-        error: function(XMLHttpRequest, textStatus, errorThrown) {
-            console.log("Too many requests");
-        }
-    });
-}
-
-// home 54.725781, 25.251190
-function findNearest(lat,lng){
-    for(var i=0; i<c.length; i++){
-        var distance = getDistanceFromLatLonInKm(lat,lng,c[i].lat,c[i].lng);
-        if(distance <= (search_radius / 1000)){
-            c[i].nearest = 1;
-        } else {
-            c[i].nearest = 0;
-        }
-
-    }
-
-    getDuration([lat,lng]);
-}
-
-function showOnlyNearest(){
-    markerCluster.clearMarkers();
-    for(var i=0; i< c.length; i++){
-        var mid = c[i].mid;
-        if(c[i].hasOwnProperty("s")){
-            var marker_id = arrayObjectIndexOf(markers,mid,"marker_id");
-            console.log("mid = " + mid + ", markers[] = " + marker_id);
-            if(c[i].nearest === 1){
-                markers[marker_id].setMap(map);
-                markers[marker_id].setVisible(true);
-            } else {
-                markers[marker_id].setVisible(false);
-            }
-        }
-    }
-
-    var new_markers = [];
-    for(var i=0; i<markers.length; i++){
-        if(markers[i].map !== null){
-            new_markers.push(markers[i]);
-        }
-    }
-    markerCluster = new MarkerClusterer(map, new_markers, cluster_options);
-}
-
-// Haversine formula (http://www.movable-type.co.uk/scripts/latlong.html)
-function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-  var R = 6371; // Radius of the earth in km
-  var dLat = deg2rad(lat2-lat1);  // deg2rad below
-  var dLon = deg2rad(lon2-lon1);
-  var a =
-    Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
-    Math.sin(dLon/2) * Math.sin(dLon/2)
-    ;
-  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  var d = R * c; // Distance in km
-  return d;
-}
-
-function deg2rad(deg) {
-  return deg * (Math.PI/180)
-}
-
-/*function getDuration(origin){
-    var coordinates = [];
-    for(var i=0; i< c.length; i++){
-        coordinates.push(c[i].lat + "," + c[i].lng);
-    }
-
-    var distanceService = new google.maps.DistanceMatrixService();
-    distanceService.getDistanceMatrix({
-        origins: [origin],
-        destinations: coordinates,
-        travelMode: google.maps.TravelMode.WALKING,
-        unitSystem: google.maps.UnitSystem.METRIC
-    },
-    function (response, status) {
-        if (status !== google.maps.DistanceMatrixStatus.OK) {
-            console.log('Error:', status);
-        } else {
-            var l = response.rows[0].elements.length;
-            for(var i=0; i<l; i++){
-                var d = response.rows[0].elements[i].duration.value / 60;
-                console.log(c[i].id + ": "+Math.round(d));
-            }
-        }
-    });
-}*/
 
 /*
 #    Getters  #
@@ -426,18 +232,6 @@ function getJobs(){
     $.ajax({
        type: "GET",
         url: "q/j/"+_p+"/"+_qt+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        /*url: "q/j/",
-        data: {
-            p: _p,
-            qt: _qt,
-            order_by: _order_by,
-            city_id: _city_id,
-            category_id: _category_id,
-            edu_id: _edu_id,
-            salary: _salary,
-            new: _new,
-            premium: _premium
-        },*/
         success: function(response){
             $.each( response, function( key, val ) {
                 j.push({
@@ -466,25 +260,12 @@ function getJobs(){
 /*
 #     Renders     #
  */
-/*
-markers[10].setIcon({
-      path: "M322.621,42.825C294.073,14.272,259.619,0,219.268,0c-40.353,0-74.803,14.275-103.353,42.825   c-28.549,28.549-42.825,63-42.825,103.353c0,20.749,3.14,37.782,9.419,51.106l104.21,220.986   c2.856,6.276,7.283,11.225,13.278,14.838c5.996,3.617,12.419,5.428,19.273,5.428c6.852,0,13.278-1.811,19.273-5.428   c5.996-3.613,10.513-8.562,13.559-14.838l103.918-220.986c6.282-13.324,9.424-30.358,9.424-51.106   C365.449,105.825,351.176,71.378,322.621,42.825z M270.942,197.855c-14.273,14.272-31.497,21.411-51.674,21.411   s-37.401-7.139-51.678-21.411c-14.275-14.277-21.414-31.501-21.414-51.678c0-20.175,7.139-37.402,21.414-51.675   c14.277-14.275,31.504-21.414,51.678-21.414c20.177,0,37.401,7.139,51.674,21.414c14.274,14.272,21.413,31.5,21.413,51.675   C292.355,166.352,285.217,183.575,270.942,197.855z",
-      scale: 0.1, fillColor: '#80cc38',
-    fillOpacity: 1,
-strokeOpacity: 1.0,
-        strokeColor: '#80cc38',
-        strokeWeight: 0.0
-    })
 
- */
 function renderMarkers(){
-    var infoWindow = new google.maps.InfoWindow();
-	var data = "", image = "http://localhost/cvm/static/images/marker_plus.png";
+    var infoWindow = new google.maps.InfoWindow(),
+        image = CVMaps.paths.i() + "marker_plus.png";
 
 	for(var i=0; i<c.length; i++){
-		/*if(typeof c[i].s === "undefined"){
-			continue;
-		} else {*/
         if(typeof c[i].s !== "undefined"){
 			if(c[i].s === "self"){
 				image = {
@@ -497,7 +278,7 @@ function renderMarkers(){
                     fillOpacity: 1
                 };
 			} else {
-                image = "http://localhost/cvm/static/images/marker_plus.png";
+                image = CVMaps.paths.i() + "marker_plus.png";
             }
 
 			var position = new google.maps.LatLng(c[i].lat, c[i].lng);
@@ -516,23 +297,14 @@ function renderMarkers(){
 
 			google.maps.event.addListener(marker, 'click', (function(marker, i) {
 	            return function() {
+                    var content = '', salary = '';
                     $.ajax({
                         type: "GET",
                         url: "q/get_jobs/"+marker.job_id,
 
                         success: function(response) {
-                            pr.title = response[0].title;
-                            var salary = "";
 
-                            if (response[0].salary_from !== null && response[0].salary_to === null ) {
-                                salary += 'Nuo ' + response[0].salary_from;
-                            } else if (response[0].salary_from === null && response[0].salary_to !== null) {
-                                salary += 'Iki ' + response[0].salary_to;
-                            } else if (response[0].salary_from !== null && response[0].salary_to !== null) {
-                                salary += response[0].salary_from + " - " + response[0].salary_to;
-                            }
-                            salary += ' €';
-                            var content = '';
+                            salary = salaryToString(response);
 
                             if(c[i].s !== "self"){
 
@@ -545,29 +317,32 @@ function renderMarkers(){
                                     type: "GET",
                                     url: "q/get_jobs/"+ids,
                                     success: function(response) {
+                                        content += '<ul class="infoWindow_list">';
                                         $.each( response, function( key, val ) {
-                                            var points_arr_id = arrayObjectIndexOf(points_to_child,val.id,"id");
-                                            if(points_arr_id >= 0){
-                                                content += '<span id="job'+val.id+'" style="color:'+points_to_child[points_arr_id].color+'">'+val.title+'</span><hr/>';
+                                            salary = salaryToString(response,key);
+                                            var childs_arr_id = arrayObjectIndexOf(children,val.id,"id");
+
+                                            if(childs_arr_id >= 0){
+                                                content += '<li><div style="color:'+children[childs_arr_id].color+'; font-size:'+(children[childs_arr_id].scale+5)+'px">'+val.title+'</div>';
                                             } else {
-                                                content += '<span id="job'+val.id+'">'+val.title+'</span><hr/>';
+                                                content += '<li><div>'+val.title+'</div>';
                                             }
 
-
-
-
+                                            content += '<div class="m-company">'+val.company+'</div>';
+                                            content += '<div class="m-price">'+salary+'</div>';
+                                            content += '</li>';
                                         });
+                                        content += '</ul>';
                                         infoWindow.setContent(content);
                                         infoWindow.open(map, marker);
                                     }
 
                                  });
                             } else {
-                                content = response[0].title+'<div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div><a href="" class="m-button">Rodyti skelbimą</a>';
+                                content += response[0].title+'<div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div><a href="" class="m-button">Rodyti skelbimą</a>';
                                 infoWindow.setContent(content);
                                 infoWindow.open(map, marker);
                             }
-
                         }
                     });
 	            }
@@ -576,13 +351,10 @@ function renderMarkers(){
 
 		}
 	}
-    $("#job"+16).css("color","green");
+
    markerCluster = new MarkerClusterer(map, markers, cluster_options);
 }
 
-function test1(){
-
-}
 /*
 #    Search, order and filter functions   #
  */
@@ -600,18 +372,6 @@ $("#search").submit(function(event){
     $.ajax({
         type: "GET",
         url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        /*url: "m/",
-        data: {
-            p: _p,
-            qt: _qt,
-            order_by: _order_by,
-            city_id: _city_id,
-            category_id: _category_id,
-            edu_id: _edu_id,
-            salary: _salary,
-            new: _new,
-            premium: _premium
-        },*/
         success: function(response){
             clearMarkers();
             $.each( response, function( key, val ) {
@@ -900,6 +660,177 @@ $("#dd_category_id > a").on("click", function(event){
 	        });
 
 });
+
+
+/*
+#    Home setter functions  #
+ */
+
+function enableSetHomePosition(){
+    set_home_position = map.addListener('click', function(e) {
+        placeMarkerAndPanTo(e.latLng, map);
+    });
+}
+
+function disableSetHomePosition(){
+    google.maps.event.removeListener(set_home_position);
+}
+
+function placeMarkerAndPanTo(latLng, map) {
+    if(home_marker.length > 0){
+        home_marker[0].setMap(null);
+        home_marker = [];
+    }
+
+    if(home_radius.length > 0){
+        home_radius[0].setMap(null);
+        home_radius = [];
+    }
+
+    var marker = new google.maps.Marker({
+        position: {lat:latLng.lat() , lng:latLng.lng()},
+        draggable:true,
+        map: map
+    });
+
+    var radius = new google.maps.Circle({
+      strokeColor: '#666666',
+      strokeOpacity: 0.5,
+      strokeWeight: 2,
+      fillColor: '#000000',
+      fillOpacity: 0.05,
+      map: map,
+      center: new google.maps.LatLng(latLng.lat(), latLng.lng()),
+      radius: search_radius,
+        editable: true
+
+    });
+
+    google.maps.event.addListener(radius, 'radius_changed', function() {
+        search_radius = radius.getRadius();
+        findNearest(marker.getPosition().lat(),marker.getPosition().lng());
+    });
+
+    google.maps.event.addListener(radius, 'center_changed', function() {
+        marker.setPosition(radius.getCenter());
+        findNearest(radius.getCenter().lat(),radius.getCenter().lng());
+    });
+
+    google.maps.event.addListener(marker, 'dragend', function() {
+        radius.setCenter(marker.getPosition());
+        findNearest(marker.getPosition().lat(),marker.getPosition().lng());
+    });
+
+    map.panTo(latLng);
+    if(map.zoom < 13){
+        map.setZoom(13);
+    }
+
+    home_radius.push(radius);
+    home_marker.push(marker);
+
+    findNearest(latLng.lat(),latLng.lng());
+}
+
+/*
+#    Job price calculation functions    #
+ */
+
+/*
+    V locations, pervaja koordinata, eto ta, ot kotoroj schitaem (dom. adres).
+    Mapzen dejstvuet na ogranichenno rasstojanie ot tochek (~200km), poetomu snachalo nuzhno vybrat gorod.
+ */
+function getDuration(origin){
+    var destinations = "";
+    var nearest_jobs = [];
+    for(var i=0; i< c.length; i++){
+        if(c[i].nearest === 1){
+            nearest_jobs.push({id: c[i].id});
+            destinations += '{"lat":'+c[i].lat
+                            +',"lon":'+c[i].lng+'}';
+            destinations += ',';
+        }
+    }
+
+    if(destinations.length > 0){
+        destinations = destinations.slice(0, -1);
+    } else {
+        console.log("No work here");
+        return;
+    }
+
+    $.ajax({
+      type: 'GET',
+      url: 'http://matrix.mapzen.com/one_to_many',
+        data: {
+            json: '{' +
+            '"locations":' +
+                '[{"lat":'+origin[0]+',"lon":'+origin[1]+'},'+destinations+'],' +
+            '"costing":' +
+                '"pedestrian",' +
+            '"api_key":' +
+                '"mapzen-cqWzJVB"' +
+            '}'
+        },
+      dataType: 'json',
+      success: function(jsonData) {
+          jQuery.each( jsonData.one_to_many[0], function( i, val ) {
+              if(val.to_index != 0){
+                  /* c[i-1] - t.k. koordinaty idut po ocheredi, a samyj pervyj - start, poetomu ejo
+                    ignoriruem (val.to_index != 0)
+                  */
+                  var id = arrayObjectIndexOf(j,nearest_jobs[i-1].id,"id");
+                  j[id].time = round((val.time/60),1);
+              }
+            });
+
+      },
+        error: function() {
+            console.log("Too many requests");
+        }
+    });
+}
+
+function findNearest(lat,lng){
+    for(var i=0; i<c.length; i++){
+        var distance = getDistanceFromLatLonInKm(lat,lng,c[i].lat,c[i].lng);
+        if(distance <= (search_radius / 1000)){
+            c[i].nearest = 1;
+        } else {
+            c[i].nearest = 0;
+        }
+
+    }
+
+    getDuration([lat,lng]);
+}
+
+function showOnlyNearest(){
+    markerCluster.clearMarkers();
+    for(var i=0; i< c.length; i++){
+        var mid = c[i].mid;
+        if(c[i].hasOwnProperty("s")){
+            var marker_id = arrayObjectIndexOf(markers,mid,"marker_id");
+            console.log("mid = " + mid + ", markers[] = " + marker_id);
+            if(c[i].nearest === 1){
+                markers[marker_id].setMap(map);
+                markers[marker_id].setVisible(true);
+            } else {
+                markers[marker_id].setVisible(false);
+            }
+        }
+    }
+
+    var new_markers = [];
+    for(var i=0; i<markers.length; i++){
+        if(markers[i].map !== null){
+            new_markers.push(markers[i]);
+        }
+    }
+    markerCluster = new MarkerClusterer(map, new_markers, cluster_options);
+}
+
+
 /*
 #    Event handlers   #
  */
@@ -1116,18 +1047,29 @@ function restoreJobRanking(){
 			delete markers[i].points;
 		}
 
-		markers[i].setIcon({
-			path: google.maps.SymbolPath.CIRCLE,
-                    scale: 7,
-                    strokeColor: '#8bc34a',
-                    strokeOpacity: 0.2,
-                    strokeWeight: 12,
-                    fillColor: '#8bc34a',
-                    fillOpacity: 1
-		});
+        if(typeof markers[i].icon === "string"){
+            markers[i].setIcon(CVMaps.paths.i() + "marker_plus.png");
+        } else {
+            markers[i].setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                        scale: 7,
+                        strokeColor: '#8bc34a',
+                        strokeOpacity: 0.2,
+                        strokeWeight: 12,
+                        fillColor: '#8bc34a',
+                        fillOpacity: 1
+            });
+        }
+
 	}
 
-    points_to_child = [];
+    for(var i=0; i<j.length; i++){
+        if(j[i].hasOwnProperty("points")){
+			delete j[i].points;
+		}
+    }
+
+    children = [];
 }
 
 function jobRankingDelayed(){
@@ -1135,7 +1077,9 @@ function jobRankingDelayed(){
 }
 
 function jobRanking(){
+    // Return all markers', c[], j[] and other parameters to default
 	restoreJobRanking();
+
     var data = [];
 
     for(var i=0; i< c.length; i++){
@@ -1202,6 +1146,7 @@ function jobRanking(){
     var distance = [];
     var average_salary = [];
     var credit = [];
+    var result;
 
     for(var i=0; i<dl; i++){
         result = data[i].salary / maxs.salary;
@@ -1233,10 +1178,11 @@ function jobRanking(){
     }
 
     for(var i=0; i<data.length; i++){
-        var childs = hasChildrens(data[i].id);
-        var is_child = isChild(data[i].id);
-        if(childs || is_child){
-            points_to_child.push({id: data[i].id, points: data[i].points});
+        var jid = arrayObjectIndexOf(j,data[i].id,"id");
+        console.log(jid);
+        j[jid].points = data[i].points;
+        if(hasChildren(data[i].id) || isChild(data[i].id)){
+            children.push({id: data[i].id, points: data[i].points});
         } else {
             var mid = arrayObjectIndexOf(markers,data[i].id,"job_id");
             markers[mid].points = data[i].points;
@@ -1244,29 +1190,18 @@ function jobRanking(){
 
     }
 
-    rateMarkers();
+    scaleDownValues();
+    initList2(); // temporary
 }
 
-function hasChildrens(cid){
-    var c_array_id = arrayObjectIndexOf(c,cid,"id");
-    return typeof c[c_array_id].s === "object";
+function hasChildren(cid){
+    var id = arrayObjectIndexOf(c,cid,"id");
+    return typeof c[id].s === "object";
 }
 
 function isChild(cid){
-    var c_array_id = arrayObjectIndexOf(c,cid,"id");
-    return typeof c[c_array_id].s !== "object" && typeof c[c_array_id].s !== "string";
-}
-
-function rateMarkers(){
-    /*var max = {id: 0, val: 0};
-    for(var i=0; i<markers.length; i++){
-        if(max.val < markers[i].points){
-            max.val = markers[i].points;
-            max.id = i;
-        }
-    }*/
-
-    scaleDownValues();
+    var id = arrayObjectIndexOf(c,cid,"id");
+    return typeof c[id].s !== "object" && typeof c[id].s !== "string";
 }
 
 function round(number, precision) {
@@ -1274,6 +1209,25 @@ function round(number, precision) {
     var tempNumber = number * factor;
     var roundedTempNumber = Math.round(tempNumber);
     return roundedTempNumber / factor;
+}
+
+// Haversine formula (http://www.movable-type.co.uk/scripts/latlong.html)
+function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
+  var R = 6371; // Radius of the earth in km
+  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+  var dLon = deg2rad(lon2-lon1);
+  var a =
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+    Math.sin(dLon/2) * Math.sin(dLon/2)
+    ;
+  var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  var d = R * c; // Distance in km
+  return d;
+}
+
+function deg2rad(deg) {
+  return deg * (Math.PI/180)
 }
 
 // https://stackoverflow.com/questions/11121012/how-to-scale-down-the-values-so-they-could-fit-inside-the-min-and-max-values
@@ -1290,13 +1244,11 @@ function scaleDownValues(){
 		}
 	}
 
-    for(var i=0; i<points_to_child.length; i++){
-		if(points_to_child[i].hasOwnProperty("points")){
-			data.push({id: points_to_child[i].id, points: points_to_child[i].points, not_marker: true});
+    for(var i=0; i<children.length; i++){
+		if(children[i].hasOwnProperty("points")){
+			data.push({id: children[i].id, points: children[i].points, not_marker: true});
 		}
 	}
-
-    console.log(data);
 
 	var max_value = Math.max.apply(Math,data.map(function(o){return o.points;})),
 		min_value = Math.min.apply(Math,data.map(function(o){return o.points;}));
@@ -1313,8 +1265,9 @@ function scaleDownValues(){
 
 		var scale_value = smin + sratio * (data[i].points - min_value);
         if(data[i].hasOwnProperty("not_marker")){
-            var id = arrayObjectIndexOf(points_to_child,data[i].id,"id");
-            points_to_child[id].color = color;
+            var id = arrayObjectIndexOf(children,data[i].id,"id");
+            children[id].color = color;
+            children[id].scale = scale_value;
         } else {
             markers[mid].setIcon(
                 {
@@ -1352,9 +1305,18 @@ function rgb2hex(rgb){
   ("0" + parseInt(rgb[3],10).toString(16)).slice(-2) : '';
 }
 
-// debug functions
-function msg($text){
-    console.log($text);
+
+function salaryToString(response,key){
+    key = typeof key !== 'undefined' ? key : 0;
+    var salary = '';
+    if (response[key].salary_from !== null && response[key].salary_to === null ) {
+        salary += 'Nuo ' + response[key].salary_from;
+    } else if (response[key].salary_from === null && response[key].salary_to !== null) {
+        salary += 'Iki ' + response[key].salary_to;
+    } else if (response[key].salary_from !== null && response[key].salary_to !== null) {
+        salary += response[key].salary_from + " - " + response[key].salary_to;
+    }
+    return salary += ' €';
 }
 
 /*$.ajax({
@@ -1437,16 +1399,29 @@ function arrayObjectIndexOfReverse(myArray, searchTerm, property) {
     }
     return content;
 }*/
-var jobs = {
-    jobs: [
-    {id: 11,value: 0},
-    {id: 18,value: 0},
-    {id: 19,value: 0}
-    ],
-    setValues: function(){
-        this.jobs.forEach(function(e){
-            e.value = 1;
-        });
 
+/*function getDuration(origin){
+    var coordinates = [];
+    for(var i=0; i< c.length; i++){
+        coordinates.push(c[i].lat + "," + c[i].lng);
     }
-};
+
+    var distanceService = new google.maps.DistanceMatrixService();
+    distanceService.getDistanceMatrix({
+        origins: [origin],
+        destinations: coordinates,
+        travelMode: google.maps.TravelMode.WALKING,
+        unitSystem: google.maps.UnitSystem.METRIC
+    },
+    function (response, status) {
+        if (status !== google.maps.DistanceMatrixStatus.OK) {
+            console.log('Error:', status);
+        } else {
+            var l = response.rows[0].elements.length;
+            for(var i=0; i<l; i++){
+                var d = response.rows[0].elements[i].duration.value / 60;
+                console.log(c[i].id + ": "+Math.round(d));
+            }
+        }
+    });
+}*/
