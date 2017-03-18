@@ -128,7 +128,7 @@ function initList2() {
         for (var i = 0; i < j.length; i++) {
             if(j[i].hasOwnProperty("points")){
                 var salary = salaryToString(j,i);
-            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="static/images/l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div></a></li>');
+            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="static/images/l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="16"> ~ '+Math.floor(j[i].time)+' min.</div></div></a></li>');
             }
 
         }
@@ -447,6 +447,14 @@ $("#salary").on("change", function(){
     _salary = $("#salary").val();
     j = [];
     initParam();
+    /*var c_buffer = [];
+    for(var i=0; i< c.length; i++){
+        if(c[i].nearest === 1){
+            c_buffer.push(c[i].id);
+        }
+    }
+
+    console.log(c_buffer);*/
 
     $.ajax({
         type: "GET",
@@ -455,9 +463,21 @@ $("#salary").on("change", function(){
             clearMarkers();
             $.each( response, function( key, val ) {
                 c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
+
             });
+
             groupMarkers(c);
             renderMarkers();
+
+            /*for(var i=0; i<c_buffer.length; i++){
+                var id = arrayObjectIndexOf(c,c_buffer[i],"id");
+                if(id >= 0) {
+                    c[id].nearest = 1;
+                }
+
+
+            }*/
+            //findNearest(home_marker[0].position.lat(),home_marker[0].position.lng());
         }
     });
 });
@@ -729,6 +749,7 @@ function placeMarkerAndPanTo(latLng, map) {
     home_radius.push(radius);
     home_marker.push(marker);
 
+    // Need to show map faster, not calculate nearest
     findNearest(latLng.lat(),latLng.lng());
 }
 
@@ -784,6 +805,8 @@ function getDuration(origin){
               }
             });
 
+            jobRanking();
+
       },
         error: function() {
             console.log("Too many requests");
@@ -830,6 +853,157 @@ function showOnlyNearest(){
     markerCluster = new MarkerClusterer(map, new_markers, cluster_options);
 }
 
+function restoreJobRanking(){
+	for(var i=0; i<markers.length; i++){
+		if(markers[i].hasOwnProperty("points")){
+			delete markers[i].points;
+		}
+
+        if(typeof markers[i].icon === "string"){
+            markers[i].setIcon(CVMaps.paths.i() + "marker_plus.png");
+        } else {
+            markers[i].setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                        scale: 7,
+                        strokeColor: '#8bc34a',
+                        strokeOpacity: 0.2,
+                        strokeWeight: 12,
+                        fillColor: '#8bc34a',
+                        fillOpacity: 1
+            });
+        }
+
+	}
+
+    for(var i=0; i<j.length; i++){
+        if(j[i].hasOwnProperty("points")){
+			delete j[i].points;
+		}
+    }
+
+    children = [];
+}
+
+function jobRankingDelayed(){
+    setTimeout(function() { jobRanking(); }, 1000);
+}
+
+function jobRanking(){
+    // Return all markers', c[], j[] and other parameters to default
+	restoreJobRanking();
+
+    var data = [];
+
+    for(var i=0; i< c.length; i++){
+        if(c[i].nearest === 1){
+            var jid = c[i].id;
+            var j_arr_id = arrayObjectIndexOf(j,jid.toString(),"id");
+            data.push({
+                id: c[i].id,
+                distance: parseFloat(j[j_arr_id].time),
+                salary: parseFloat(j[j_arr_id].salary_from),
+                average_salary: parseFloat(c[i].avg),
+                credit: parseInt(c[i].credit)
+            });
+        }
+    }
+
+    if(data.length === 1){
+	        var mid = arrayObjectIndexOf(markers,data[0].id,"job_id");
+	        markers[mid].points = 1;
+	        markers[mid].setIcon({
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 9,
+                    strokeColor: '#72ae2c',
+                    strokeOpacity: 0.2,
+                    strokeWeight: 12,
+                    fillColor: '#72ae2c',
+                    fillOpacity: 1
+                });
+	    return;
+    }
+
+    var weight = {
+        salary: 0.50,
+        distance: 0.25,
+        average_salary: 0.18,
+        credit: 0.07
+    };
+
+    var dl = data.length;
+
+    var mins = {
+        distance: []
+    };
+
+    var maxs = {
+        salary: [],
+        average_salary: [],
+        credit: []
+    };
+
+    for(var i=0; i<dl; i++){
+        maxs.salary[i] = data[i].salary;
+        mins.distance[i] = data[i].distance;
+        maxs.average_salary[i] = data[i].average_salary;
+        maxs.credit[i] = data[i].credit;
+    }
+
+    maxs.salary = Math.max.apply(Math,maxs.salary);
+    mins.distance = Math.min.apply(Math,mins.distance);
+    maxs.average_salary = Math.max.apply(Math,maxs.average_salary);
+    maxs.credit = Math.max.apply(Math,maxs.credit);
+
+    var salary = [];
+    var distance = [];
+    var average_salary = [];
+    var credit = [];
+    var result;
+
+    for(var i=0; i<dl; i++){
+        result = data[i].salary / maxs.salary;
+        salary.push(result);
+
+        result = mins.distance / data[i].distance;
+        distance.push(result);
+
+        result = data[i].average_salary / maxs.average_salary;
+        average_salary.push(result);
+
+        if(maxs.credit === 0){
+            result = 0;
+        } else {
+            result = data[i].credit / maxs.credit;
+        }
+
+        credit.push(result);
+    }
+
+    for(var i=0; i<dl; i++){
+        result =
+            weight.salary * salary[i]
+            + weight.distance * distance[i]
+            + weight.average_salary * average_salary[i]
+            + weight.credit * credit[i];
+
+        data[i].points = round(result,4);
+    }
+
+    for(var i=0; i<data.length; i++){
+        var jid = arrayObjectIndexOf(j,data[i].id,"id");
+        j[jid].points = data[i].points;
+        if(hasChildren(data[i].id) || isChild(data[i].id)){
+            children.push({id: data[i].id, points: data[i].points});
+        } else {
+            var mid = arrayObjectIndexOf(markers,data[i].id,"job_id");
+            markers[mid].points = data[i].points;
+        }
+
+    }
+
+    scaleDownValues();
+    initList2(); // temporary
+}
 
 /*
 #    Event handlers   #
@@ -1039,159 +1213,6 @@ function arrayObjectIndexOf(myArray, searchTerm, property) {
 
 function countPages(){
     return Math.round(param.jobs / 30);
-}
-
-function restoreJobRanking(){
-	for(var i=0; i<markers.length; i++){
-		if(markers[i].hasOwnProperty("points")){
-			delete markers[i].points;
-		}
-
-        if(typeof markers[i].icon === "string"){
-            markers[i].setIcon(CVMaps.paths.i() + "marker_plus.png");
-        } else {
-            markers[i].setIcon({
-                path: google.maps.SymbolPath.CIRCLE,
-                        scale: 7,
-                        strokeColor: '#8bc34a',
-                        strokeOpacity: 0.2,
-                        strokeWeight: 12,
-                        fillColor: '#8bc34a',
-                        fillOpacity: 1
-            });
-        }
-
-	}
-
-    for(var i=0; i<j.length; i++){
-        if(j[i].hasOwnProperty("points")){
-			delete j[i].points;
-		}
-    }
-
-    children = [];
-}
-
-function jobRankingDelayed(){
-    setTimeout(function() { jobRanking(); }, 1000);
-}
-
-function jobRanking(){
-    // Return all markers', c[], j[] and other parameters to default
-	restoreJobRanking();
-
-    var data = [];
-
-    for(var i=0; i< c.length; i++){
-        if(c[i].nearest === 1){
-            var jid = c[i].id;
-            var j_arr_id = arrayObjectIndexOf(j,jid.toString(),"id");
-            data.push({
-                id: c[i].id,
-                distance: parseFloat(j[j_arr_id].time),
-                salary: parseFloat(j[j_arr_id].salary_from),
-                average_salary: parseFloat(c[i].avg),
-                credit: parseInt(c[i].credit)
-            });
-        }
-    }
-
-    if(data.length === 1){
-	        var mid = arrayObjectIndexOf(markers,data[0].id,"job_id");
-	        markers[mid].points = 1;
-	        markers[mid].setIcon({
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 9,
-                    strokeColor: '#72ae2c',
-                    strokeOpacity: 0.2,
-                    strokeWeight: 12,
-                    fillColor: '#72ae2c',
-                    fillOpacity: 1
-                });
-	    return;
-    }
-
-    var weight = {
-        salary: 0.50,
-        distance: 0.25,
-        average_salary: 0.18,
-        credit: 0.07
-    };
-
-    var dl = data.length;
-
-    var mins = {
-        distance: []
-    };
-
-    var maxs = {
-        salary: [],
-        average_salary: [],
-        credit: []
-    };
-
-    for(var i=0; i<dl; i++){
-        maxs.salary[i] = data[i].salary;
-        mins.distance[i] = data[i].distance;
-        maxs.average_salary[i] = data[i].average_salary;
-        maxs.credit[i] = data[i].credit;
-    }
-
-    maxs.salary = Math.max.apply(Math,maxs.salary);
-    mins.distance = Math.min.apply(Math,mins.distance);
-    maxs.average_salary = Math.max.apply(Math,maxs.average_salary);
-    maxs.credit = Math.max.apply(Math,maxs.credit);
-
-    var salary = [];
-    var distance = [];
-    var average_salary = [];
-    var credit = [];
-    var result;
-
-    for(var i=0; i<dl; i++){
-        result = data[i].salary / maxs.salary;
-        salary.push(result);
-
-        result = mins.distance / data[i].distance;
-        distance.push(result);
-
-        result = data[i].average_salary / maxs.average_salary;
-        average_salary.push(result);
-
-        if(maxs.credit === 0){
-            result = 0;
-        } else {
-            result = data[i].credit / maxs.credit;
-        }
-
-        credit.push(result);
-    }
-
-    for(var i=0; i<dl; i++){
-        result =
-            weight.salary * salary[i]
-            + weight.distance * distance[i]
-            + weight.average_salary * average_salary[i]
-            + weight.credit * credit[i];
-
-        data[i].points = round(result,4);
-    }
-
-    for(var i=0; i<data.length; i++){
-        var jid = arrayObjectIndexOf(j,data[i].id,"id");
-        console.log(jid);
-        j[jid].points = data[i].points;
-        if(hasChildren(data[i].id) || isChild(data[i].id)){
-            children.push({id: data[i].id, points: data[i].points});
-        } else {
-            var mid = arrayObjectIndexOf(markers,data[i].id,"job_id");
-            markers[mid].points = data[i].points;
-        }
-
-    }
-
-    scaleDownValues();
-    initList2(); // temporary
 }
 
 function hasChildren(cid){
