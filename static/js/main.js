@@ -46,11 +46,302 @@ var cluster_options = {
 
 var children = [];
 
+
+var jobs = [];
+
+function checkIfJobUploaded(jid){
+    for(var i=0; i<jobs.length; i++){
+        if(jobs[i].jid == jid) return true;
+    }
+}
+function getMarkers2(){
+    $.ajax({
+       type: "GET",
+        url: "q/j/"+_p+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
+        success: function(response){
+            $.each( response, function( key, val ) {
+
+                    if(val.company && val.title){
+                        jobs.push({
+                            jid: val.jid,
+                            mid: val.mid,
+                            title: val.title,
+                            company: val.company,
+                            logo: val.logo,
+                            lat: val.lat,
+                            lng: val.lng,
+                            avg_sal: val.avg_sal,
+                            salary_from: val.salary_from,
+                            salary_to: val.salary_to,
+                            credit: val.credit
+                        });
+                    } else {
+                        jobs.push({
+                            jid: val.jid,
+                            mid: val.mid,
+                            lat: val.lat,
+                            lng: val.lng,
+                            avg_sal: val.avg_sal,
+                            salary_from: val.salary_from,
+                            salary_to: val.salary_to,
+                            credit: val.credit
+                        });
+                    }
+            });
+            tp = countPages();
+            $("#pg-total").html(tp);
+
+            dp.push(_p);
+
+            groupMarkers2();
+            initMap();
+
+            initList2();
+        }
+    });
+}
+function getJobs2(){
+    //rerender = typeof rerender !== 'undefined' ? rerender : 0;
+    jobs = [];
+    markers = [];
+    $.ajax({
+       type: "GET",
+        url: "q/j/"+_p+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
+        success: function(response){
+            $.each( response, function( key, val ) {
+                if(checkIfJobUploaded(val.jid)){
+                    var id = arrayObjectIndexOf(jobs,val.jid,"jid");
+                    if(!jobs[id].title){
+                        console.log(id);
+                        jobs[id].title = val.title;
+                    }
+                    if(!jobs[id].company) jobs[id].company = val.company;
+                    if(!jobs[id].logo) jobs[id].logo = val.logo;
+                } else {
+                    if(val.company && val.title){
+                        jobs.push({
+                            jid: val.jid,
+                            mid: val.mid,
+                            title: val.title,
+                            company: val.company,
+                            logo: val.logo,
+                            lat: val.lat,
+                            lng: val.lng,
+                            avg_sal: val.avg_sal,
+                            salary_from: val.salary_from,
+                            salary_to: val.salary_to,
+                            credit: val.credit
+                        });
+                    } else {
+                        jobs.push({
+                            jid: val.jid,
+                            mid: val.mid,
+                            lat: val.lat,
+                            lng: val.lng,
+                            avg_sal: val.avg_sal,
+                            salary_from: val.salary_from,
+                            salary_to: val.salary_to,
+                            credit: val.credit
+                        });
+                    }
+                }
+
+
+
+            });
+            tp = countPages();
+            $("#pg-total").html(tp);
+
+            dp.push(_p);
+
+            groupMarkers2();
+            renderMarkers2();
+
+
+            initList2();
+        }
+    });
+}
+
+function groupMarkers2(){
+	var l = jobs.length, checked = [], groups = [];
+
+    var gi = 0;
+	for(var i=0; i<l; i++){
+		var similar = similarMarkers2(jobs,jobs[i].lat,jobs[i].lng);
+		if(similar.length > 1){
+            groups[gi] = similar;
+            gi++;
+        }
+		else if ((similar.length === 1) && (jobs[i].jid === similar[0])) jobs[i].s = "self";
+
+	}
+
+	for(var i=0; i<l; i++){
+		for(var j=0; j<groups.length; j++){
+			if(jobs[i].jid === groups[j][0]){
+				jobs[i].s = groups[j];
+			}
+		}
+
+	}
+	return groups;
+}
+
+function similarMarkers2(markers, lat, lng){
+	var similar = [];
+	for(var i=0; i<markers.length; i++){
+		if(markers[i].lat === lat && markers[i].lng === lng){
+			similar.push(markers[i].jid);
+		}
+
+	}
+	return similar;
+}
+
+function renderMarkers2(){
+    markerCluster = {};
+    var infoWindow = new google.maps.InfoWindow(),
+        image = CVMaps.paths.i() + "marker_plus.png";
+
+	for(var i=0; i<jobs.length; i++){
+        if(typeof jobs[i].s !== "undefined"){
+			if(jobs[i].s === "self"){
+				image = {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 7,
+                    strokeColor: '#8bc34a',
+                    strokeOpacity: 0.2,
+                    strokeWeight: 12,
+                    fillColor: '#8bc34a',
+                    fillOpacity: 1
+                };
+			} else {
+                image = CVMaps.paths.i() + "marker_plus.png";
+            }
+
+			var position = new google.maps.LatLng(jobs[i].lat, jobs[i].lng);
+            var marker_id = jobs[i].mid;
+            var job_id = jobs[i].jid;
+
+			//var marker = new MarkerWithLabel({
+			var marker = new google.maps.Marker({
+				position: position,
+				map: map,
+				icon: image,
+                marker_id: marker_id,
+                job_id: job_id/*,
+                labelClass : "marker_label"*/
+			});
+
+			google.maps.event.addListener(marker, 'click', (function(marker, i) {
+	            return function() {
+                    var content = '', salary = '';
+                    $.ajax({
+                        type: "GET",
+                        url: "q/get_jobs/"+marker.job_id,
+
+                        success: function(response) {
+
+                            salary = salaryToString(response);
+
+                            if(jobs[i].s !== "self"){
+
+                                var ids = [];
+                                for(var j=0; j<c[i].s.length; j++){
+                                    ids.push(c[i].s[j]);
+                                }
+
+                                 $.ajax({
+                                    type: "GET",
+                                    url: "q/get_jobs/"+ids,
+                                    success: function(response) {
+                                        content += '<ul class="infoWindow_list">';
+                                        $.each( response, function( key, val ) {
+                                            salary = salaryToString(response,key);
+                                            var childs_arr_id = arrayObjectIndexOf(children,val.id,"id");
+
+                                            if(childs_arr_id >= 0){
+                                                content += '<li><div style="color:'+children[childs_arr_id].color+'; font-size:'+(children[childs_arr_id].scale+5)+'px">'+val.title+'</div>';
+                                            } else {
+                                                content += '<li><div>'+val.title+'</div>';
+                                            }
+
+                                            content += '<div class="m-company">'+val.company+'</div>';
+                                            content += '<div class="m-price">'+salary+'</div>';
+                                            content += '</li>';
+                                        });
+                                        content += '</ul>';
+                                        infoWindow.setContent(content);
+                                        infoWindow.open(map, marker);
+                                    }
+
+                                 });
+                            } else {
+                                content += response[0].title+'<div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div><a href="" class="m-button">Rodyti skelbimą</a>';
+                                infoWindow.setContent(content);
+                                infoWindow.open(map, marker);
+                            }
+                        }
+                    });
+	            }
+	        })(marker, i));
+			markers.push(marker);
+
+		}
+	}
+
+   markerCluster = new MarkerClusterer(map, markers, cluster_options);
+}
+
+function initList2() {
+    $('.window__list').animate({
+        scrollTop: 0
+    }, 300);
+    var start = (_p-1) * 30,
+        end;
+    if(param.jobs < 30){
+        end = (start + param.jobs);
+    } else {
+        end = (start + 30);
+    }
+
+    // vycheslenie kol-vo objavlenij na poslednej stranice
+    if(_p == tp){
+        end = start + (param.jobs - (tp - 1) * 30);
+    }
+
+    $("#jobs-count").html(param.jobs);
+
+    var list = $(".window__list ul");
+    list.html("");
+
+    if(typeof jobs !== "undefined") {
+        for (var i = start; i < end; i++) {
+            var salary = salaryToString(jobs,i);
+            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + jobs[i].title + '"><div class="offer-logo"><img src="static/images/l/' + jobs[i].logo + '" width="74"></div><div class="offer-content"><h5>' + jobs[i].title + '</h5><div class="offer-company">' + jobs[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div></a></li>');
+        }
+    }
+    $("#pg-current").html(_p);
+
+}
+
+function initParam2(){
+    $.ajax({
+        type: "GET",
+        url: "q/init_param/"+_p+"/"+_qt+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
+        success: function(p){
+            param.jobs = p.jobs;
+        }
+	});
+}
+
 /*
     Load homepage parameters and load up jobs list
  */
 
-initParam();
+//initParam();
+initParam2();
 
 /*
 #    Initiators   #
@@ -102,7 +393,7 @@ function initList() {
 
 }
 
-function initList2() {
+/*function initList2() {
     $('.window__list').animate({
         scrollTop: 0
     }, 300);
@@ -135,7 +426,7 @@ function initList2() {
     }
     $("#pg-current").html(_p);
 
-}
+}*/
 
 function initMap() {
 	var cvMapsStyle=new google.maps.StyledMapType([{featureType:"administrative",elementType:"labels.text.fill",stylers:[{color:"#444444"}]},{featureType:"administrative.country",elementType:"geometry.fill",stylers:[{visibility:"on"}]},{featureType:"administrative.province",elementType:"labels.icon",stylers:[{hue:"#ff0000"},{visibility:"on"}]},{featureType:"landscape",elementType:"all",stylers:[{color:"#f2f2f2"}]},{featureType:"poi",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.business",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.government",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.medical",elementType:"geometry",stylers:[{visibility:"on"},{color:"#f5e4e4"}]},{featureType:"poi.park",elementType:"geometry",stylers:[{visibility:"on"},{color:"#deefdd"}]},{featureType:"road",elementType:"all",stylers:[{saturation:-100},{lightness:45}]},{featureType:"road.highway",elementType:"all",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"geometry",stylers:[{visibility:"on"}]},{featureType:"road.highway",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#f8e491"}]},{featureType:"road.highway",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road.highway",elementType:"labels",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"labels.text.fill",stylers:[{visibility:"off"}]},{featureType:"road.highway.controlled_access",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"road.arterial",elementType:"labels.icon",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"transit.station",elementType:"all",stylers:[{visibility:"on"}]},{featureType:"water",elementType:"all",stylers:[{color:"#46bcec"},{visibility:"on"}]},{featureType:"water",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#78d2ff"}]}],{name:"CV Maps"});
@@ -154,7 +445,7 @@ function initMap() {
 	map.mapTypes.set('cvmapsstyle', cvMapsStyle);
     map.setMapTypeId('cvmapsstyle');
 
-	renderMarkers();
+	renderMarkers2();
 
     map.addListener('dragstart', function() {
         $(".window").css({ opacity: 0.5 });
@@ -354,6 +645,7 @@ function renderMarkers(){
 
    markerCluster = new MarkerClusterer(map, markers, cluster_options);
 }
+
 
 /*
 #    Search, order and filter functions   #
@@ -640,11 +932,12 @@ $("#only_new").on("change", function(){
  */
 $("#category_id").on("change", function(){
    _category_id = parseInt($("#category_id").val());
-    j = [];
-    initParam();
+    jobs = [];
+    initParam2();
+    getJobs2();
     $("input[type=search]").val("");
 
-            $.ajax({
+            /*$.ajax({
                 type: "GET",
                 url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
                 success: function(response){
@@ -655,7 +948,7 @@ $("#category_id").on("change", function(){
                     groupMarkers(c);
                     renderMarkers();
                 }
-	        });
+	        });*/
 
 });
 
@@ -1129,7 +1422,7 @@ $("#page-prev").on("click", function(){
     if(_p > 1){
         _p = _p - 1;
         paginationUpdate();
-        initList();
+        initList2();
     }
 });
 
@@ -1138,9 +1431,9 @@ $("#page-next").on("click", function(){
         _p = _p + 1;
         paginationUpdate();
         if(dp.indexOf(_p) > -1){
-            initList();
+            initList2();
         } else {
-            getJobs();
+            getJobs2();
         }
     }
 });
@@ -1212,7 +1505,7 @@ function arrayObjectIndexOf(myArray, searchTerm, property) {
 
 
 function countPages(){
-    return Math.round(param.jobs / 30);
+    return Math.ceil(param.jobs / 30);
 }
 
 function hasChildren(cid){
