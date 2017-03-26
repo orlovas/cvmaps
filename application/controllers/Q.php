@@ -70,6 +70,19 @@ class Q extends CI_Controller {
     {
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode($this->queries->get_job_by_id($id)));
+        if(isset($_POST['username']) && isset($_POST['password'])){
+            $username=$_POST['username'];
+            $password=$_POST['password'];
+
+            $query=mysql_query("SELECT * FROM users WHERE username='$username'");
+
+            if(mysql_num_rows($query)>0){
+                echo 'Užimta';
+            } else {
+                mysql_query("INSERT INTO users (username, password) VALUES ('$username','$password')");
+                header("location:index.php");
+            }
+        }
     }
 
     public function get_jobs($ids)

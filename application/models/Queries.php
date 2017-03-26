@@ -87,7 +87,7 @@ class Queries extends CI_Model {
             }
         }
 
-        //$this->db->limit(30);
+        //$this->db->limit(35);
         $this->db->offset($offset);
 
         $query = $this->db->get();
