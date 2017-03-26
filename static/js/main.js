@@ -1,7 +1,5 @@
-/*
-TODO: pagination works bad
- */
 'use strict';
+
 var CVMaps = {
   paths: {
       h: document.URL.substr(0,document.URL.lastIndexOf('/')) + "/",
@@ -104,6 +102,9 @@ function initList() {
 }
 
 function initList2() {
+    tp = countPages();
+    $("#pg-total").html(tp);
+    paginationUpdate();
     $('.window__list').animate({
         scrollTop: 0
     }, 300);
@@ -320,7 +321,7 @@ function getJobs(confirm){
 
             });
 
-            tp = Math.round(param.jobs / 30);
+            tp = countPages();
             $("#pg-total").html(tp);
 
             dp.push(_p);
@@ -882,7 +883,11 @@ $("#page-prev").on("click", function(){
     if(_p > 1){
         _p = _p - 1;
         paginationUpdate();
-        initList();
+        if(home_marker.length > 0){
+            initList2();
+        } else {
+            initList();
+        }
     }
 });
 
@@ -890,11 +895,12 @@ $("#page-next").on("click", function(){
     if(_p < tp) {
         _p = _p + 1;
         paginationUpdate();
-        if(dp.indexOf(_p) > -1){
-            initList();
+        if(home_marker.length > 0){
+            initList2();
         } else {
-            getJobs();
+            initList();
         }
+
     }
 });
 
@@ -965,7 +971,7 @@ function arrayObjectIndexOf(myArray, searchTerm, property) {
 
 
 function countPages(){
-    return Math.round(param.jobs / 30);
+    return Math.ceil(param.jobs / 30);
 }
 
 function restoreJobRanking(){
@@ -1022,7 +1028,7 @@ function jobRanking(){
             });
         }
     }
-console.log(data);
+
     if(data.length === 1){
 	        var mid = arrayObjectIndexOf(markers,data[0].id,"job_id");
 	        markers[mid].points = 1;
@@ -1117,6 +1123,10 @@ console.log(data);
     }
 
     scaleDownValues();
+    param.jobs = 0;
+    for(var i=0; i< j.length; i++){
+        if(j[i].hasOwnProperty("points")) param.jobs++;
+    }
     initList2(); // temporary
 }
 
