@@ -32,18 +32,7 @@ class Q extends CI_Controller {
         )));
     }
 
-    public function j($page = 1,$order_by = NULL,$city_id = NULL,$category_id = NULL,$edu_id = NULL,$salary = NULL, $work_time = NULL, $worker_type_id = NULL, $is_student = 0, $is_school = 0, $is_pensioneer = 0, $is_disabled = 0, $is_shift = 0, $no_exp = 0)
-    {
-
-           $this->output->set_content_type('application/json');
-            $this->output->set_output(json_encode($this->queries->get_jobs(
-                $page,$order_by,$city_id,$category_id,$edu_id,$salary,$work_time,
-                $worker_type_id,$is_student,$is_school,$is_pensioneer,$is_disabled,$is_shift,$no_exp
-            )));
-
-    }
-
-    public function j2($page = NULL,$query_text = NULL,$order_by = NULL,$city_id = NULL,$category_id = NULL,$edu_id = NULL,$salary = NULL,$new = NULL,$premium = NULL, $work_time = NULL, $worker_type_id = NULL, $is_student = 0, $is_school = 0, $is_pensioneer = 0, $is_disabled = 0, $is_shift = 0, $no_exp = 0)
+    public function j($page = NULL,$query_text = NULL,$order_by = NULL,$city_id = NULL,$category_id = NULL,$edu_id = NULL,$salary = NULL,$new = NULL,$premium = NULL, $work_time = NULL, $worker_type_id = NULL, $is_student = 0, $is_school = 0, $is_pensioneer = 0, $is_disabled = 0, $is_shift = 0, $no_exp = 0)
     {
         /*$page = $this->input->get('page', TRUE);
 		if(!isset($page)){
@@ -81,6 +70,19 @@ class Q extends CI_Controller {
     {
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode($this->queries->get_job_by_id($id)));
+        if(isset($_POST['username']) && isset($_POST['password'])){
+            $username=$_POST['username'];
+            $password=$_POST['password'];
+
+            $query=mysql_query("SELECT * FROM users WHERE username='$username'");
+
+            if(mysql_num_rows($query)>0){
+                echo 'Užimta';
+            } else {
+                mysql_query("INSERT INTO users (username, password) VALUES ('$username','$password')");
+                header("location:index.php");
+            }
+        }
     }
 
     public function get_jobs($ids)

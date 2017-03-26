@@ -41,313 +41,23 @@ var search_radius = 2000;
 var cluster_options = {
     imagePath: CVMaps.paths.i()+'m',
     gridSize: 40,
-    maxZoom: 15
+    maxZoom: 14
 };
 
 var children = [];
-
-
-var jobs = [];
-
-function checkIfJobUploaded(jid){
-    for(var i=0; i<jobs.length; i++){
-        if(jobs[i].jid == jid) return true;
-    }
-}
-function getMarkers2(){
-    $.ajax({
-       type: "GET",
-        url: "q/j/"+_p+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            $.each( response, function( key, val ) {
-
-                    if(val.company && val.title){
-                        jobs.push({
-                            jid: val.jid,
-                            mid: val.mid,
-                            title: val.title,
-                            company: val.company,
-                            logo: val.logo,
-                            lat: val.lat,
-                            lng: val.lng,
-                            avg_sal: val.avg_sal,
-                            salary_from: val.salary_from,
-                            salary_to: val.salary_to,
-                            credit: val.credit
-                        });
-                    } else {
-                        jobs.push({
-                            jid: val.jid,
-                            mid: val.mid,
-                            lat: val.lat,
-                            lng: val.lng,
-                            avg_sal: val.avg_sal,
-                            salary_from: val.salary_from,
-                            salary_to: val.salary_to,
-                            credit: val.credit
-                        });
-                    }
-            });
-            tp = countPages();
-            $("#pg-total").html(tp);
-
-            dp.push(_p);
-
-            groupMarkers2();
-            initMap();
-
-            initList2();
-        }
-    });
-}
-function getJobs2(){
-    //rerender = typeof rerender !== 'undefined' ? rerender : 0;
-    jobs = [];
-    markers = [];
-    $.ajax({
-       type: "GET",
-        url: "q/j/"+_p+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            $.each( response, function( key, val ) {
-                if(checkIfJobUploaded(val.jid)){
-                    var id = arrayObjectIndexOf(jobs,val.jid,"jid");
-                    if(!jobs[id].title){
-                        console.log(id);
-                        jobs[id].title = val.title;
-                    }
-                    if(!jobs[id].company) jobs[id].company = val.company;
-                    if(!jobs[id].logo) jobs[id].logo = val.logo;
-                } else {
-                    if(val.company && val.title){
-                        jobs.push({
-                            jid: val.jid,
-                            mid: val.mid,
-                            title: val.title,
-                            company: val.company,
-                            logo: val.logo,
-                            lat: val.lat,
-                            lng: val.lng,
-                            avg_sal: val.avg_sal,
-                            salary_from: val.salary_from,
-                            salary_to: val.salary_to,
-                            credit: val.credit
-                        });
-                    } else {
-                        jobs.push({
-                            jid: val.jid,
-                            mid: val.mid,
-                            lat: val.lat,
-                            lng: val.lng,
-                            avg_sal: val.avg_sal,
-                            salary_from: val.salary_from,
-                            salary_to: val.salary_to,
-                            credit: val.credit
-                        });
-                    }
-                }
-
-
-
-            });
-            tp = countPages();
-            $("#pg-total").html(tp);
-
-            dp.push(_p);
-
-            groupMarkers2();
-            renderMarkers2();
-
-
-            initList2();
-        }
-    });
-}
-
-function groupMarkers2(){
-	var l = jobs.length, checked = [], groups = [];
-
-    var gi = 0;
-	for(var i=0; i<l; i++){
-		var similar = similarMarkers2(jobs,jobs[i].lat,jobs[i].lng);
-		if(similar.length > 1){
-            groups[gi] = similar;
-            gi++;
-        }
-		else if ((similar.length === 1) && (jobs[i].jid === similar[0])) jobs[i].s = "self";
-
-	}
-
-	for(var i=0; i<l; i++){
-		for(var j=0; j<groups.length; j++){
-			if(jobs[i].jid === groups[j][0]){
-				jobs[i].s = groups[j];
-			}
-		}
-
-	}
-	return groups;
-}
-
-function similarMarkers2(markers, lat, lng){
-	var similar = [];
-	for(var i=0; i<markers.length; i++){
-		if(markers[i].lat === lat && markers[i].lng === lng){
-			similar.push(markers[i].jid);
-		}
-
-	}
-	return similar;
-}
-
-function renderMarkers2(){
-    markerCluster = {};
-    var infoWindow = new google.maps.InfoWindow(),
-        image = CVMaps.paths.i() + "marker_plus.png";
-
-	for(var i=0; i<jobs.length; i++){
-        if(typeof jobs[i].s !== "undefined"){
-			if(jobs[i].s === "self"){
-				image = {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 7,
-                    strokeColor: '#8bc34a',
-                    strokeOpacity: 0.2,
-                    strokeWeight: 12,
-                    fillColor: '#8bc34a',
-                    fillOpacity: 1
-                };
-			} else {
-                image = CVMaps.paths.i() + "marker_plus.png";
-            }
-
-			var position = new google.maps.LatLng(jobs[i].lat, jobs[i].lng);
-            var marker_id = jobs[i].mid;
-            var job_id = jobs[i].jid;
-
-			//var marker = new MarkerWithLabel({
-			var marker = new google.maps.Marker({
-				position: position,
-				map: map,
-				icon: image,
-                marker_id: marker_id,
-                job_id: job_id/*,
-                labelClass : "marker_label"*/
-			});
-
-			google.maps.event.addListener(marker, 'click', (function(marker, i) {
-	            return function() {
-                    var content = '', salary = '';
-                    $.ajax({
-                        type: "GET",
-                        url: "q/get_jobs/"+marker.job_id,
-
-                        success: function(response) {
-
-                            salary = salaryToString(response);
-
-                            if(jobs[i].s !== "self"){
-
-                                var ids = [];
-                                for(var j=0; j<c[i].s.length; j++){
-                                    ids.push(c[i].s[j]);
-                                }
-
-                                 $.ajax({
-                                    type: "GET",
-                                    url: "q/get_jobs/"+ids,
-                                    success: function(response) {
-                                        content += '<ul class="infoWindow_list">';
-                                        $.each( response, function( key, val ) {
-                                            salary = salaryToString(response,key);
-                                            var childs_arr_id = arrayObjectIndexOf(children,val.id,"id");
-
-                                            if(childs_arr_id >= 0){
-                                                content += '<li><div style="color:'+children[childs_arr_id].color+'; font-size:'+(children[childs_arr_id].scale+5)+'px">'+val.title+'</div>';
-                                            } else {
-                                                content += '<li><div>'+val.title+'</div>';
-                                            }
-
-                                            content += '<div class="m-company">'+val.company+'</div>';
-                                            content += '<div class="m-price">'+salary+'</div>';
-                                            content += '</li>';
-                                        });
-                                        content += '</ul>';
-                                        infoWindow.setContent(content);
-                                        infoWindow.open(map, marker);
-                                    }
-
-                                 });
-                            } else {
-                                content += response[0].title+'<div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div><a href="" class="m-button">Rodyti skelbimą</a>';
-                                infoWindow.setContent(content);
-                                infoWindow.open(map, marker);
-                            }
-                        }
-                    });
-	            }
-	        })(marker, i));
-			markers.push(marker);
-
-		}
-	}
-
-   markerCluster = new MarkerClusterer(map, markers, cluster_options);
-}
-
-function initList2() {
-    $('.window__list').animate({
-        scrollTop: 0
-    }, 300);
-    var start = (_p-1) * 30,
-        end;
-    if(param.jobs < 30){
-        end = (start + param.jobs);
-    } else {
-        end = (start + 30);
-    }
-
-    // vycheslenie kol-vo objavlenij na poslednej stranice
-    if(_p == tp){
-        end = start + (param.jobs - (tp - 1) * 30);
-    }
-
-    $("#jobs-count").html(param.jobs);
-
-    var list = $(".window__list ul");
-    list.html("");
-
-    if(typeof jobs !== "undefined") {
-        for (var i = start; i < end; i++) {
-            var salary = salaryToString(jobs,i);
-            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + jobs[i].title + '"><div class="offer-logo"><img src="static/images/l/' + jobs[i].logo + '" width="74"></div><div class="offer-content"><h5>' + jobs[i].title + '</h5><div class="offer-company">' + jobs[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div></a></li>');
-        }
-    }
-    $("#pg-current").html(_p);
-
-}
-
-function initParam2(){
-    $.ajax({
-        type: "GET",
-        url: "q/init_param/"+_p+"/"+_qt+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(p){
-            param.jobs = p.jobs;
-        }
-	});
-}
 
 /*
     Load homepage parameters and load up jobs list
  */
 
-//initParam();
-initParam2();
+initParam();
 
 /*
 #    Initiators   #
 */
 
-function initParam(){
+function initParam(confirm){
+    confirm = typeof confirm !== 'undefined' ? confirm : 0;
     $.ajax({
         type: "GET",
         url: "q/init_param/"+_p+"/"+_qt+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
@@ -356,7 +66,7 @@ function initParam(){
         },
         complete: function(){
             // loading jobs if parameters set
-            if(j.length < 1) getJobs();
+            if(j.length < 1) getJobs(confirm);
         }
 	});
 }
@@ -393,7 +103,7 @@ function initList() {
 
 }
 
-/*function initList2() {
+function initList2() {
     $('.window__list').animate({
         scrollTop: 0
     }, 300);
@@ -426,10 +136,91 @@ function initList() {
     }
     $("#pg-current").html(_p);
 
-}*/
+}
 
 function initMap() {
-	var cvMapsStyle=new google.maps.StyledMapType([{featureType:"administrative",elementType:"labels.text.fill",stylers:[{color:"#444444"}]},{featureType:"administrative.country",elementType:"geometry.fill",stylers:[{visibility:"on"}]},{featureType:"administrative.province",elementType:"labels.icon",stylers:[{hue:"#ff0000"},{visibility:"on"}]},{featureType:"landscape",elementType:"all",stylers:[{color:"#f2f2f2"}]},{featureType:"poi",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.business",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.government",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.medical",elementType:"geometry",stylers:[{visibility:"on"},{color:"#f5e4e4"}]},{featureType:"poi.park",elementType:"geometry",stylers:[{visibility:"on"},{color:"#deefdd"}]},{featureType:"road",elementType:"all",stylers:[{saturation:-100},{lightness:45}]},{featureType:"road.highway",elementType:"all",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"geometry",stylers:[{visibility:"on"}]},{featureType:"road.highway",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#f8e491"}]},{featureType:"road.highway",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road.highway",elementType:"labels",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"labels.text.fill",stylers:[{visibility:"off"}]},{featureType:"road.highway.controlled_access",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"road.arterial",elementType:"labels.icon",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"transit.station",elementType:"all",stylers:[{visibility:"on"}]},{featureType:"water",elementType:"all",stylers:[{color:"#46bcec"},{visibility:"on"}]},{featureType:"water",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#78d2ff"}]}],{name:"CV Maps"});
+	/*var cvMapsStyle=new google.maps.StyledMapType([{featureType:"administrative",elementType:"labels.text.fill",stylers:[{color:"#444444"}]},{featureType:"administrative.country",elementType:"geometry.fill",stylers:[{visibility:"on"}]},{featureType:"administrative.province",elementType:"labels.icon",stylers:[{hue:"#ff0000"},{visibility:"on"}]},{featureType:"landscape",elementType:"all",stylers:[{color:"#f2f2f2"}]},{featureType:"poi",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.business",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.government",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"poi.medical",elementType:"geometry",stylers:[{visibility:"on"},{color:"#f5e4e4"}]},{featureType:"poi.park",elementType:"geometry",stylers:[{visibility:"on"},{color:"#deefdd"}]},{featureType:"road",elementType:"all",stylers:[{saturation:-100},{lightness:45}]},{featureType:"road.highway",elementType:"all",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"geometry",stylers:[{visibility:"on"}]},{featureType:"road.highway",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#f8e491"}]},{featureType:"road.highway",elementType:"geometry.stroke",stylers:[{visibility:"off"}]},{featureType:"road.highway",elementType:"labels",stylers:[{visibility:"simplified"}]},{featureType:"road.highway",elementType:"labels.text.fill",stylers:[{visibility:"off"}]},{featureType:"road.highway.controlled_access",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"road.arterial",elementType:"labels.icon",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"transit.station",elementType:"all",stylers:[{visibility:"on"}]},{featureType:"water",elementType:"all",stylers:[{color:"#46bcec"},{visibility:"on"}]},{featureType:"water",elementType:"geometry.fill",stylers:[{visibility:"on"},{color:"#78d2ff"}]}],{name:"CV Maps"});*/
+
+    var cvMapsStyle=new google.maps.StyledMapType([
+    {
+        "featureType": "administrative",
+        "elementType": "labels.text.fill",
+        "stylers": [
+            {
+                "color": "#444444"
+            }
+        ]
+    },
+    {
+        "featureType": "landscape",
+        "elementType": "all",
+        "stylers": [
+            {
+                "color": "#f2f2f2"
+            }
+        ]
+    },
+    {
+        "featureType": "poi",
+        "elementType": "all",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "road",
+        "elementType": "all",
+        "stylers": [
+            {
+                "saturation": -100
+            },
+            {
+                "lightness": 45
+            }
+        ]
+    },
+    {
+        "featureType": "road.highway",
+        "elementType": "all",
+        "stylers": [
+            {
+                "visibility": "simplified"
+            }
+        ]
+    },
+    {
+        "featureType": "road.arterial",
+        "elementType": "labels.icon",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "transit",
+        "elementType": "all",
+        "stylers": [
+            {
+                "visibility": "off"
+            }
+        ]
+    },
+    {
+        "featureType": "water",
+        "elementType": "all",
+        "stylers": [
+            {
+                "color": "#46bcec"
+            },
+            {
+                "visibility": "on"
+            }
+        ]
+    }
+],{name:"CV Maps"});
 
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 54.694988, lng: 25.278570},
@@ -445,7 +236,7 @@ function initMap() {
 	map.mapTypes.set('cvmapsstyle', cvMapsStyle);
     map.setMapTypeId('cvmapsstyle');
 
-	renderMarkers2();
+	renderMarkers();
 
     map.addListener('dragstart', function() {
         $(".window").css({ opacity: 0.5 });
@@ -491,18 +282,6 @@ function getMarkers(){
     $.ajax({
         type: "GET",
         url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        /*url: "m/",
-        data: {
-            p: _p,
-            qt: _qt,
-            order_by: _order_by,
-            city_id: _city_id,
-            category_id: _category_id,
-            edu_id: _edu_id,
-            salary: _salary,
-            new: _new,
-            premium: _premium
-        },*/
         success: function(response){
             $.each( response, function( key, val ) {
                 c.push({
@@ -519,7 +298,8 @@ function getMarkers(){
 	});
 }
 
-function getJobs(){
+function getJobs(confirm){
+    confirm = typeof confirm !== 'undefined' ? confirm : 0;
     $.ajax({
        type: "GET",
         url: "q/j/"+_p+"/"+_qt+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
@@ -544,6 +324,41 @@ function getJobs(){
             $("#pg-total").html(tp);
 
             dp.push(_p);
+        },
+        complete: function(){
+            if(confirm){
+                $.ajax({
+            type: "GET",
+            url: "q/m/" + _qt + "/" + _category_id + "/" + _city_id + "/" + _edu_id + "/" + _salary + "/" + _new + "/" + _premium + "/" + _work_time + "/" + _worker_type_id + "/" + _student + "/" + _school + "/" + _pensioneer + "/" + _disabled + "/" + _shift + "/" + _no_exp,
+            success: function (response) {
+                clearMarkers();
+                $.each(response, function (key, val) {
+                    c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng, avg: val.avg_sal, credit: val.credit});
+
+                });
+
+                groupMarkers(c);
+                renderMarkers();
+
+                /*for (var i = 0; i < confirm[1].length; i++) {
+                    var id = arrayObjectIndexOf(c, confirm[1][i], "id");
+                    if (id >= 0) {
+                        c[id].nearest = 1;
+                    }
+                }
+
+                for (var i = 0; i < confirm[0].length; i++) {
+                    var id = arrayObjectIndexOf(j, confirm[0][i].id, "id");
+                    if (id >= 0) {
+                        j[id].time = confirm[0][id].time;
+                    }
+                }*/
+                if(home_radius.length > 0) findNearest(home_marker[0].position.lat(),home_marker[0].position.lng());
+                //getDuration([home_marker[0].position.lat(),home_marker[0].position.lng()]);
+                //jobRanking();
+            }
+        });
+            }
         }
     });
 }
@@ -646,7 +461,6 @@ function renderMarkers(){
    markerCluster = new MarkerClusterer(map, markers, cluster_options);
 }
 
-
 /*
 #    Search, order and filter functions   #
  */
@@ -681,250 +495,82 @@ $("#search").submit(function(event){
 $("#city_id").on("change", function(){
     _city_id = parseInt($("#city_id").val());
     j = [];
-    initParam();
-
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
+    initParam(true);
 });
 
 $("#work_time").on("change", function(){
     _work_time = parseInt($("#work_time").val());
     j = [];
-    initParam();
-
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
+    initParam(true);
 });
 
 $("#worker_type").on("change", function(){
     _worker_type_id = parseInt($("#worker_type").val());
     j = [];
-    initParam();
-
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
+    initParam(true);
 });
 
 $("#salary").on("change", function(){
     _salary = $("#salary").val();
-    j = [];
-    initParam();
-    /*var c_buffer = [];
-    for(var i=0; i< c.length; i++){
-        if(c[i].nearest === 1){
-            c_buffer.push(c[i].id);
+   /* var j_buffer = [];
+    for(var i=0; i< j.length; i++){
+        if(j[i].hasOwnProperty("time")){
+            j_buffer.push({id: j[i].id, time:j[i].time});
         }
     }
 
-    console.log(c_buffer);*/
+    var c_buffer = [];
+        for (var i = 0; i < c.length; i++) {
+            if (c[i].nearest === 1) {
+                c_buffer.push(c[i].id);
+            }
+        }*/
 
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-
-            });
-
-            groupMarkers(c);
-            renderMarkers();
-
-            /*for(var i=0; i<c_buffer.length; i++){
-                var id = arrayObjectIndexOf(c,c_buffer[i],"id");
-                if(id >= 0) {
-                    c[id].nearest = 1;
-                }
+    j = [];
+    initParam(true);
 
 
-            }*/
-            //findNearest(home_marker[0].position.lat(),home_marker[0].position.lng());
-        }
-    });
 });
 
 
 $("#is_student").on("change", function(){
     _student = $('#is_student:checked').length;
     j = [];
-    initParam();
+    initParam(true);
 
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
 });
 
 $("#is_school").on("change", function(){
     _school = $('#is_school:checked').length;
     j = [];
-    initParam();
+    initParam(true);
 
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
 });
 
 $("#is_pensioneer").on("change", function(){
     _pensioneer = $('#is_pensioneer:checked').length;
     j = [];
-    initParam();
-
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
+    initParam(true);
 });
 
 $("#is_disabled").on("change", function(){
     _disabled = $('#is_disabled:checked').length;
     j = [];
-    initParam();
+    initParam(true);
 
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
 });
 
 $("#is_shift").on("change", function(){
     _shift = $('#is_shift:checked').length;
     j = [];
-    initParam();
-
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
+    initParam(true);
 });
 
 $("#no_exp").on("change", function(){
     _no_exp = $('#no_exp:checked').length;
     j = [];
-    initParam();
+    initParam(true);
 
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
-});
-
-$("#only_premium").on("change", function(){
-    _premium = $('#only_premium:checked').length;
-    j = [];
-    initParam();
-
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
-});
-
-$("#only_new").on("change", function(){
-    _new = $('#only_new:checked').length;
-    j = [];
-    initParam();
-
-    $.ajax({
-        type: "GET",
-        url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-        success: function(response){
-            clearMarkers();
-            $.each( response, function( key, val ) {
-                c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-            });
-            groupMarkers(c);
-            renderMarkers();
-        }
-    });
 });
 
 /*
@@ -932,23 +578,9 @@ $("#only_new").on("change", function(){
  */
 $("#category_id").on("change", function(){
    _category_id = parseInt($("#category_id").val());
-    jobs = [];
-    initParam2();
-    getJobs2();
+    j = [];
+    initParam(true);
     $("input[type=search]").val("");
-
-            /*$.ajax({
-                type: "GET",
-                url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-                success: function(response){
-                    clearMarkers();
-                    $.each( response, function( key, val ) {
-                        c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-                    });
-                    groupMarkers(c);
-                    renderMarkers();
-                }
-	        });*/
 
 });
 
@@ -957,20 +589,7 @@ $("#dd_category_id > a").on("click", function(event){
    _category_id = parseInt($(this).attr('href').substr(1));
     $("input[type=search]").val($(this).text());
     j = [];
-    initParam();
-
-            $.ajax({
-                type: "GET",
-                url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-                success: function(response){
-                    clearMarkers();
-                    $.each( response, function( key, val ) {
-                        c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-                    });
-                    groupMarkers(c);
-                    renderMarkers();
-                }
-	        });
+    initParam(true);
 
 });
 
@@ -1146,6 +765,209 @@ function showOnlyNearest(){
     markerCluster = new MarkerClusterer(map, new_markers, cluster_options);
 }
 
+
+/*
+#    Event handlers   #
+ */
+
+$("#window_sort_close").click(function(){
+   wsort();
+});
+
+$("#cancel-sort").click(function() {
+    $("input[type=search]").val("");
+    _p = 1;
+    _qt = 0;
+    _order_by = "date_desc";
+    _city_id = 0;
+    _category_id = 0;
+    _edu_id = 0;
+    _salary = 0;
+    _new = 0;
+    _premium = 0;
+    _work_time = 0;
+    _worker_type_id = 0;
+    _student = 0;
+    _school = 0;
+    _pensioneer = 0;
+    _disabled = 0;
+    _shift = 0;
+    _no_exp = 0;
+
+    j = [];
+    if(home_marker.length > 0){
+        initParam(true);
+    } else {
+        initParam();
+    }
+
+    wsort();
+
+    $('#city_id option').prop('selected', function() {
+        return this.defaultSelected;
+    });
+
+    $('#category_id option').prop('selected', function() {
+        return this.defaultSelected;
+    });
+
+    $('#salary option').prop('selected', function() {
+        return this.defaultSelected;
+    });
+
+    $('#work_time option').prop('selected', function() {
+        return this.defaultSelected;
+    });
+
+    $('#worker_type option').prop('selected', function() {
+        return this.defaultSelected;
+    });
+
+    $("#is_student").prop("checked", false);
+    $("#is_school").prop("checked", false);
+    $("#is_pensioneer").prop("checked", false);
+    $("#is_disabled").prop("checked", false);
+    $("#is_shift").prop("checked", false);
+    $("#no_exp").prop("checked", false);
+    $("#only_premium").prop("checked", false);
+    $("#only_new").prop("checked", false);
+
+
+});
+
+function wsort(){
+    var wsort = document.querySelectorAll(".window__sort")[0];
+    var wsort_footer = document.querySelectorAll(".window__sort__footer")[0];
+    var wpagination = document.querySelectorAll(".window__pagination")[0];
+    var wlist = document.querySelectorAll(".window__list")[0];
+    var wpgn = document.querySelectorAll(".window__pagination")[0];
+    if(wsort.style.display === "" || wsort.style.display === "none"){
+        wsort.style.display = "block";
+        wsort_footer.style.display = "block";
+        wpagination.style.display = "none";
+        wlist.style.display = "none";
+        wpgn.style.display = "none";
+    } else if (wsort.style.display === "block"){
+        wsort.style.display = "none";
+        wsort_footer.style.display = "none";
+        wpagination.style.display = "block";
+        wlist.style.display = "block";
+        wpgn.style.display = "block";
+    }
+}
+
+function wdropdown(){
+    var wsearch = document.querySelectorAll(".search-field")[0];
+    var wdropdown = document.querySelectorAll(".search-dropdown")[0];
+    if(wdropdown.style.display === "" || wdropdown.style.display === "none"){
+        wdropdown.style.display = "block";
+        wsearch.style.borderBottomRightRadius = '0';
+        wsearch.style.borderBottomLeftRadius = '0';
+    } else if (wdropdown.style.display === "block"){
+        wdropdown.style.display = "none";
+        wsearch.style.borderBottomRightRadius = '';
+        wsearch.style.borderBottomLeftRadius = '';
+    }
+}
+
+
+function paginationUpdate(){
+    if(_p > 1) $("#page-prev").removeClass("btn-disabled");
+    if(_p === 1) $("#page-prev").addClass("btn-disabled");
+    if(_p < tp) $("#page-next").removeClass("btn-disabled");
+    if(_p === tp) $("#page-next").addClass("btn-disabled");
+}
+
+$("#page-prev").on("click", function(){
+    if(_p > 1){
+        _p = _p - 1;
+        paginationUpdate();
+        initList();
+    }
+});
+
+$("#page-next").on("click", function(){
+    if(_p < tp) {
+        _p = _p + 1;
+        paginationUpdate();
+        if(dp.indexOf(_p) > -1){
+            initList();
+        } else {
+            getJobs();
+        }
+    }
+});
+
+$("#toggle_list").on("click", function(){
+    $(".window").slideToggle();
+    $("#show_list").toggle();
+});
+
+$("#show_list").on("click", function(){
+    $(".window").slideToggle();
+    $("#show_list").toggle();
+});
+
+/*
+###    Miscellaneous functions  ###
+ */
+
+function clearMarkers(){
+    c = [];
+    for(var i=0; i<markers.length; i++){
+        markers[i].setMap(null);
+    }
+    markers = [];
+    markerCluster.clearMarkers();
+}
+
+function groupMarkers(markers){
+	var l = markers.length, checked = [], groups = [];
+    var gi = 0;
+	for(var i=0; i<l; i++){
+		var similar = similarMarkers(markers,markers[i].lat,markers[i].lng);
+		if(similar.length > 1){
+            groups[gi] = similar;
+            gi++;
+        }
+		else if ((similar.length === 1) && (c[i].id === similar[0])) c[i].s = "self";
+
+	}
+
+	for(var i=0; i<l; i++){
+		for(var j=0; j<groups.length; j++){
+			if(c[i].id === groups[j][0]){
+				c[i].s = groups[j];
+			}
+		}
+
+	}
+	return groups;
+}
+
+function similarMarkers(markers, lat, lng){
+	var similar = [];
+	for(var i=0; i<markers.length; i++){
+		if(markers[i].lat === lat && markers[i].lng === lng){
+			similar.push(markers[i].id);
+		}
+
+	}
+	return similar;
+}
+
+function arrayObjectIndexOf(myArray, searchTerm, property) {
+    for (var i = 0, len = myArray.length; i < len; i++) {
+        if (myArray[i][property] === searchTerm) return i;
+    }
+    return -1;
+}
+
+
+function countPages(){
+    return Math.round(param.jobs / 30);
+}
+
 function restoreJobRanking(){
 	for(var i=0; i<markers.length; i++){
 		if(markers[i].hasOwnProperty("points")){
@@ -1190,7 +1012,7 @@ function jobRanking(){
     for(var i=0; i< c.length; i++){
         if(c[i].nearest === 1){
             var jid = c[i].id;
-            var j_arr_id = arrayObjectIndexOf(j,jid.toString(),"id");
+            var j_arr_id = arrayObjectIndexOf(j,jid,"id");
             data.push({
                 id: c[i].id,
                 distance: parseFloat(j[j_arr_id].time),
@@ -1200,7 +1022,7 @@ function jobRanking(){
             });
         }
     }
-
+console.log(data);
     if(data.length === 1){
 	        var mid = arrayObjectIndexOf(markers,data[0].id,"job_id");
 	        markers[mid].points = 1;
@@ -1298,216 +1120,6 @@ function jobRanking(){
     initList2(); // temporary
 }
 
-/*
-#    Event handlers   #
- */
-
-$("#window_sort_close").click(function(){
-   wsort();
-});
-
-$("#cancel-sort").click(function() {
-    $("input[type=search]").val("");
-    _p = 1;
-    _qt = 0;
-    _order_by = "date_desc";
-    _city_id = 0;
-    _category_id = 0;
-    _edu_id = 0;
-    _salary = 0;
-    _new = 0;
-    _premium = 0;
-    _work_time = 0;
-    _worker_type_id = 0;
-    _student = 0;
-    _school = 0;
-    _pensioneer = 0;
-    _disabled = 0;
-    _shift = 0;
-    _no_exp = 0;
-
-    j = [];
-    initParam();
-
-    $.ajax({
-                type: "GET",
-                url: "q/m/"+_qt+"/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_new+"/"+_premium+"/"+_work_time+"/"+_worker_type_id+"/"+_student+"/"+_school+"/"+_pensioneer+"/"+_disabled+"/"+_shift+"/"+_no_exp,
-                success: function(response){
-                    clearMarkers();
-                    $.each( response, function( key, val ) {
-                        c.push({id: val.jid, mid: val.mid, lat: val.lat, lng: val.lng});
-                    });
-                    groupMarkers(c);
-                    renderMarkers();
-                    wsort();
-                }
-	        });
-
-    $('#city_id option').prop('selected', function() {
-        return this.defaultSelected;
-    });
-
-    $('#category_id option').prop('selected', function() {
-        return this.defaultSelected;
-    });
-
-    $('#salary option').prop('selected', function() {
-        return this.defaultSelected;
-    });
-
-    $('#work_time option').prop('selected', function() {
-        return this.defaultSelected;
-    });
-
-    $('#worker_type option').prop('selected', function() {
-        return this.defaultSelected;
-    });
-
-    $("#is_student").prop("checked", false);
-    $("#is_school").prop("checked", false);
-    $("#is_pensioneer").prop("checked", false);
-    $("#is_disabled").prop("checked", false);
-    $("#is_shift").prop("checked", false);
-    $("#no_exp").prop("checked", false);
-    $("#only_premium").prop("checked", false);
-    $("#only_new").prop("checked", false);
-
-
-});
-
-function wsort(){
-    var wsort = document.querySelectorAll(".window__sort")[0];
-    var wsort_footer = document.querySelectorAll(".window__sort__footer")[0];
-    var wpagination = document.querySelectorAll(".window__pagination")[0];
-    var wlist = document.querySelectorAll(".window__list")[0];
-    var wpgn = document.querySelectorAll(".window__pagination")[0];
-    if(wsort.style.display === "" || wsort.style.display === "none"){
-        wsort.style.display = "block";
-        wsort_footer.style.display = "block";
-        wpagination.style.display = "none";
-        wlist.style.display = "none";
-        wpgn.style.display = "none";
-    } else if (wsort.style.display === "block"){
-        wsort.style.display = "none";
-        wsort_footer.style.display = "none";
-        wpagination.style.display = "block";
-        wlist.style.display = "block";
-        wpgn.style.display = "block";
-    }
-}
-
-function wdropdown(){
-    var wsearch = document.querySelectorAll(".search-field")[0];
-    var wdropdown = document.querySelectorAll(".search-dropdown")[0];
-    if(wdropdown.style.display === "" || wdropdown.style.display === "none"){
-        wdropdown.style.display = "block";
-        wsearch.style.borderBottomRightRadius = '0';
-        wsearch.style.borderBottomLeftRadius = '0';
-    } else if (wdropdown.style.display === "block"){
-        wdropdown.style.display = "none";
-        wsearch.style.borderBottomRightRadius = '';
-        wsearch.style.borderBottomLeftRadius = '';
-    }
-}
-
-
-function paginationUpdate(){
-    if(_p > 1) $("#page-prev").removeClass("btn-disabled");
-    if(_p === 1) $("#page-prev").addClass("btn-disabled");
-    if(_p < tp) $("#page-next").removeClass("btn-disabled");
-    if(_p === tp) $("#page-next").addClass("btn-disabled");
-}
-
-$("#page-prev").on("click", function(){
-    if(_p > 1){
-        _p = _p - 1;
-        paginationUpdate();
-        initList2();
-    }
-});
-
-$("#page-next").on("click", function(){
-    if(_p < tp) {
-        _p = _p + 1;
-        paginationUpdate();
-        if(dp.indexOf(_p) > -1){
-            initList2();
-        } else {
-            getJobs2();
-        }
-    }
-});
-
-$("#toggle_list").on("click", function(){
-    $(".window").slideToggle();
-    $("#show_list").toggle();
-});
-
-$("#show_list").on("click", function(){
-    $(".window").slideToggle();
-    $("#show_list").toggle();
-});
-
-/*
-###    Miscellaneous functions  ###
- */
-
-function clearMarkers(){
-    c = [];
-    for(var i=0; i<markers.length; i++){
-        markers[i].setMap(null);
-    }
-    markers = [];
-    markerCluster.clearMarkers();
-}
-
-function groupMarkers(markers){
-	var l = markers.length, checked = [], groups = [];
-    var gi = 0;
-	for(var i=0; i<l; i++){
-		var similar = similarMarkers(markers,markers[i].lat,markers[i].lng);
-		if(similar.length > 1){
-            groups[gi] = similar;
-            gi++;
-        }
-		else if ((similar.length === 1) && (c[i].id === similar[0])) c[i].s = "self";
-
-	}
-
-	for(var i=0; i<l; i++){
-		for(var j=0; j<groups.length; j++){
-			if(c[i].id === groups[j][0]){
-				c[i].s = groups[j];
-			}
-		}
-
-	}
-	return groups;
-}
-
-function similarMarkers(markers, lat, lng){
-	var similar = [];
-	for(var i=0; i<markers.length; i++){
-		if(markers[i].lat === lat && markers[i].lng === lng){
-			similar.push(markers[i].id);
-		}
-
-	}
-	return similar;
-}
-
-function arrayObjectIndexOf(myArray, searchTerm, property) {
-    for (var i = 0, len = myArray.length; i < len; i++) {
-        if (myArray[i][property] === searchTerm) return i;
-    }
-    return -1;
-}
-
-
-function countPages(){
-    return Math.ceil(param.jobs / 30);
-}
-
 function hasChildren(cid){
     var id = arrayObjectIndexOf(c,cid,"id");
     return typeof c[id].s === "object";
@@ -1546,7 +1158,7 @@ function deg2rad(deg) {
 
 // https://stackoverflow.com/questions/11121012/how-to-scale-down-the-values-so-they-could-fit-inside-the-min-and-max-values
 function scaleDownValues(){
-	var min = 10,
+	var min = 15,
 		max = 100,
 		ratio;
     var smin = 6, smax = 12, sratio;
@@ -1601,7 +1213,7 @@ function scaleDownValues(){
 }
 
 function valueToColor(val) {
-    val = 110 - val;
+    val = 115 - val;
 
 	var r = Math.floor((255 * val) / 100),
 	    g = Math.floor((255 * (100 - val)) / 100),
