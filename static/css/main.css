@@ -218,10 +218,7 @@ th {
 .bottom {
     vertical-align: bottom
 }
-a:focus,
-button:focus,
-button:active,
-#map:active {
+a:focus{
     background-color: #fffdec !important
 }
 a {
@@ -309,10 +306,10 @@ a:hover {
     display: block;
     position: absolute
 }
-.header__switch {
+/*.header__switch {
     position: absolute;
     right: 0
-}
+}*/
 .header__menu {
     position: absolute;
     left: 250px;
@@ -344,7 +341,7 @@ a:hover {
     position: absolute;
     right: 15px;
 }
-.header__phone {
+/*.header__phone {
     color: #444;
     position: absolute;
     left: 750px;
@@ -354,7 +351,7 @@ a:hover {
     line-height: 42px;
     right: 0;
     position: absolute
-}
+}*/
 .menu {
     background: #f2f2f2;
     border-bottom: 3px solid #ddd;
@@ -374,7 +371,7 @@ a:hover {
     padding: 0;
     margin: 0 20px 0 0
 }
-.big-search {
+/*.big-search {
     position: relative;
     background-color: #0288d1;
     border-radius: 4px;
@@ -493,8 +490,8 @@ a:hover {
     color: #878787;
     margin-right: 10px;
     text-decoration: underline
-}
-.joblist {
+}*/
+/*.joblist {
     margin: 15px 0
 }
 .joblist .link--job {
@@ -569,7 +566,7 @@ a:hover {
 }
 .job h5 a {
     color: #0288d1
-}
+}*/
 .window {
     background-color: white;
     border-radius: 4px;
@@ -642,6 +639,7 @@ a:hover {
     font-size: 0.812em;
     background-color: #0288d1;
     color: #fff;
+    padding-bottom: 5px;
 }
 
 .window__sort select {
@@ -652,7 +650,7 @@ a:hover {
     cursor: pointer;
     font-family: inherit;
     /*background-color: transparent;*/
-    padding: 2px 0;
+    padding: 5px;
     /*border: none;
     border-bottom: 2px solid #81c4e8;
     -webkit-appearance: none;
@@ -677,7 +675,7 @@ a:hover {
 }
 .window__sort .sort-row {
     display: block;
-    padding: 10px
+    padding: 10px 10px 5px 10px;
 }
 
 .window__sort .sort-column {
@@ -731,6 +729,10 @@ a:hover {
 }
 .window__list .offer-right{
     padding: 10px 5px;
+}
+.window__list .offer-right-inactive{
+    filter: grayscale(100%);
+opacity: 0.5;
 }
 .window__list .offer-logo,
 .window__list .offer-content,
@@ -786,7 +788,7 @@ a:hover {
     text-align: center;
     width: 26%
 }
-.btn__search {
+/*.btn__search {
     display: inline-block;
     border: 0;
     border-bottom: 3px solid;
@@ -801,7 +803,7 @@ a:hover {
 }
 .btn__search:hover {
     background-color: #76ab39
-}
+}*/
 .btn {
     border-radius: 4px;
     text-decoration: none;
@@ -897,7 +899,7 @@ a:hover {
     width: 100%;
     padding: 6px 0
 }
-.ads--horizontal {
+/*.ads--horizontal {
     display: -webkit-box;
     display: -webkit-flex;
     display: -ms-flexbox;
@@ -934,7 +936,7 @@ a:hover {
 }
 .ads__logo {
     display: block
-}
+}*/
 #map {
     height: 100%
 }
@@ -1016,7 +1018,7 @@ a:hover {
 
 #pac-input{
     border: 0;
-    width: 320px;
+    width: 335px;
     height: 50px;
     padding: 10px;
     border-radius: 6px;
@@ -1131,3 +1133,42 @@ input[type=range]:focus::-ms-fill-upper {
             transform-origin: right;
             box-sizing: content-box;
         }
+
+.set_home_position{
+    background: none;
+    border: 0;
+    border-left: 1px solid silver;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    top: 3px;
+}
+
+.set_home_position_icon{
+    fill: silver;
+    margin: 0 10px;
+}
+
+.set_home_position:hover .set_home_position_icon{
+    fill: black;
+}
+
+.set_home_position_active .set_home_position_icon{
+    fill: #0288d1;
+}
+
+.loading{
+    display: none;
+    position: absolute;
+    top:0;
+    width: 100%;
+    height: 4px;
+    background: #0288d1;
+    z-index: 1000;
+    transition: all 0.5s;
+}
+
+.loading-screen{
+    /*display: none;*/
+    position: absolute;
+}

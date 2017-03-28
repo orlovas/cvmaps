@@ -95,11 +95,10 @@ function initList() {
     if(typeof j !== "undefined") {
         for (var i = start; i < end; i++) {
             var salary = salaryToString(j,i);
-            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="static/images/l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div></a></li>');
+            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a></li>');
         }
     }
     $("#pg-current").html(_p);
-
 }
 
 function initList2() {
@@ -131,13 +130,13 @@ function initList2() {
         for (var i = 0; i < j.length; i++) {
             if(j[i].hasOwnProperty("points")){
                 var salary = salaryToString(j,i);
-            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="static/images/l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right"><div class="offer-gauge"><div class="gauge-arrow" style="transform: rotate('+j[i].gauge+'deg)"></div></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">'+Math.floor(j[i].time)+' min.</div></div></a></li>');
+            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right"><div class="offer-gauge"><div class="gauge-arrow" style="transform: rotate('+j[i].gauge+'deg)"></div></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">'+Math.floor(j[i].time)+' min.</div></div></a></li>');
             }
 
         }
     }
     $("#pg-current").html(_p);
-
+    loading(10);
 }
 
 function initMap() {
@@ -166,12 +165,12 @@ var cvMapsStyle=new google.maps.StyledMapType([{featureType:"administrative",ele
     map.addListener('dragend', function() {
         $(".window").css({ opacity: 1 });
       });
-
 }
 
 function initSearchBox(){
     var input = document.getElementById('pac-input');
-    var searchBox = new google.maps.places.SearchBox(input);
+    var options = {componentRestrictions: {country: 'lt'}};
+    var searchBox = new google.maps.places.SearchBox(input,options);
     map.addListener('bounds_changed', function() {
         searchBox.setBounds(map.getBounds());
     });
@@ -202,7 +201,6 @@ function initSearchBox(){
 function getMarkers(){
     $.ajax({
         type: "GET",
-        //url: "q/m/"+_category_id+"/"+_city_id+"/"+_edu_id+"/"+_salary+"/"+_work_time,
         url: CVMaps.paths.h,
         data: {
             c: "q",
@@ -233,7 +231,6 @@ function getJobs(confirm){
     confirm = typeof confirm !== 'undefined' ? confirm : 0;
     $.ajax({
        type: "GET",
-        //url: "q/j/"+_p+"/"+_order_by+"/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_work_time,
         url: CVMaps.paths.h,
         data: {
             c: "q",
@@ -265,14 +262,12 @@ function getJobs(confirm){
 
             tp = countPages();
             $("#pg-total").html(tp);
-
             dp.push(_p);
         },
         complete: function(){
             if(confirm){
                 $.ajax({
             type: "GET",
-            //url: "q/m/" + _category_id + "/" + _city_id + "/" + _edu_id + "/" + _salary + "/" + _work_time,
             url: CVMaps.paths.h,
             data: {
                 c: "q",
@@ -379,7 +374,6 @@ function renderMarkers(){
 
                                  $.ajax({
                                     type: "GET",
-                                    //url: "q/get_jobs/"+ids,
                                     url: CVMaps.paths.h,
                                     data: {
                                         c: "q",
@@ -446,11 +440,16 @@ $("#work_time").on("change", function(){
     initParam(true);
 });
 
-$("#salary_from").on("change", function(){
-    _salary = $("#salary_from").val();
-
-    $("#salary_from_value").html(_salary);
-   /* var j_buffer = [];
+$("#salary_from").on("input change", function(e){
+    if(e.type === "input"){
+        $("#salary_from_value").html($(this).val());
+    } else {
+        _salary = $(this).val();
+        $("#salary_from_value").html(_salary);
+        j = [];
+        initParam(true);
+    }
+/* var j_buffer = [];
     for(var i=0; i< j.length; i++){
         if(j[i].hasOwnProperty("time")){
             j_buffer.push({id: j[i].id, time:j[i].time});
@@ -463,11 +462,6 @@ $("#salary_from").on("change", function(){
                 c_buffer.push(c[i].id);
             }
         }*/
-
-    j = [];
-    initParam(true);
-
-
 });
 
 $("#distance").on("change", function(){
@@ -475,7 +469,12 @@ $("#distance").on("change", function(){
     $("#distance_value").html(time);
     var distance = (((time / 60)  * 5.1) / 1.5) * 1000;
     search_radius = Math.ceil(distance);
-    placeMarkerAndPanTo(map.getCenter(), map);
+    if(home_marker.length > 0){
+        placeMarkerAndPanTo(home_marker[0].position, map);
+    } else {
+        placeMarkerAndPanTo(map.getCenter(), map);
+    }
+
 
 });
 
@@ -505,6 +504,7 @@ $("#category_id").on("change", function(){
  */
 
 function enableSetHomePosition(){
+    $(".set_home_position").addClass("set_home_position_active");
     map.setOptions({draggableCursor:'crosshair'});
     set_home_position = map.addListener('click', function(e) {
         placeMarkerAndPanTo(e.latLng, map);
@@ -512,6 +512,7 @@ function enableSetHomePosition(){
 }
 
 function disableSetHomePosition(){
+    $(".set_home_position").removeClass("set_home_position_active");
     map.setOptions({draggableCursor:''});
     google.maps.event.removeListener(set_home_position);
 }
@@ -602,7 +603,7 @@ function getDuration(origin){
         console.log("No work here");
         return;
     }
-
+    loading(10);
     $.ajax({
       type: 'GET',
       url: 'http://matrix.mapzen.com/one_to_many',
@@ -627,7 +628,7 @@ function getDuration(origin){
                   j[id].time = round((val.time/60),1);
               }
             });
-
+            loading(40);
             jobRanking();
 
       },
@@ -647,7 +648,7 @@ function findNearest(lat,lng){
         }
 
     }
-
+    loading(10);
     getDuration([lat,lng]);
 }
 
@@ -1008,7 +1009,7 @@ function jobRanking(){
         }
 
     }
-
+    loading(30);
     scaleDownValues();
     param.jobs = 0;
     for(var i=0; i< j.length; i++){
@@ -1016,6 +1017,8 @@ function jobRanking(){
     }
     initList2(); // temporary
     $("#color-scale").show();
+    loading(10);
+
 }
 
 function hasChildren(cid){
@@ -1116,6 +1119,7 @@ function scaleDownValues(){
 
         //markers[mid].set('labelContent', j[job_arr_id].salary_from + "-" + j[job_arr_id].salary_to +" €");
 	}
+    loading(20);
 }
 
 function valueToColor(val) {
@@ -1151,109 +1155,18 @@ function salaryToString(response,key){
     return salary += ' €';
 }
 
-/*$.ajax({
-  type: 'GET',
-  url: 'https://maps.googleapis.com/maps/api/distancematrix/json',
-  data: {
-      units: "metric",
-    key: "AIzaSyAJhXhTIxa5iUsy3FQA5bERrbbxdEZ7Cls",
-      mode: "walking",
-      origins: "Kauno g. 1",
-      destinations: "Vilnius, Ozo g. 1"
-  },
-  dataType: 'json',
-  success: function(jsonData) {
-    console.log(jsonData);
-  }
-});*/
-/*
-var markers_to_show = [];
-$.each(j, function(key, val){
-  var m = arrayObjectIndexOf(markers,val.id,"job_id");
 
-  if(m !== -1){
-    //console.log(m);
-    markers_to_show.push(markers[m].marker_id);
-  }
-});
-var i = 0;
-$.each(markers, function(key,val){
+var loadbar = $(".loading");
+var loadval = 0;
 
-  var m = arrayObjectIndexOfSimple(markers_to_show,val.marker_id);
-  console.log(m);
-  if(m < 0) {
-    console.log(i);
-    markerCluster.removeMarker(markers[i]);
-    markers[i].setMap(null);
-  }
-  i++;
-});
-
-//markerCluster.resetViewport();
-
-//markerCluster.redraw();
- */
-
-/*function arrayObjectIndexOfSimple(myArray, searchTerm) {
-    for(var i = 0, len = myArray.length; i < len; i++) {
-        if (myArray[i] === searchTerm) return i;
+function loading(val){
+    loadbar.show();
+    loadval += val;
+    var width = loadval + "%";
+    loadbar.css("width",width);
+    if(loadval >= 100){
+        loadbar.fadeOut(1000, function(){
+            loadval = 0;
+        });
     }
-    return -1;
 }
-
-function arrayObjectIndexOfReverse(myArray, searchTerm, property) {
-    for(var i = 0, len = myArray.length; i < len; i++) {
-        if (myArray[i][property] !== searchTerm) return i;
-    }
-}*/
-
-/*function getPreview(id){
-    $.ajax({
-        type: "GET",
-        url: "j/",
-        data: {
-            id: id
-        },
-        success: function(response) {
-            pr.title = response.title;
-            return true;
-        }
-    });
-}*/
-
-/*function get_content(marker,i){
-    var content = '';
-    if(c[i].s !== "self"){
-        for(var j=0; j<c[i].s.length; j++){
-            var idd = arrayObjectIndexOf(c,c[i].s[j],"id");
-            content += "<b>"+c[idd].id+"</b>"+c[idd].txt+"<br/>";
-        }
-    }
-    return content;
-}*/
-
-/*function getDuration(origin){
-    var coordinates = [];
-    for(var i=0; i< c.length; i++){
-        coordinates.push(c[i].lat + "," + c[i].lng);
-    }
-
-    var distanceService = new google.maps.DistanceMatrixService();
-    distanceService.getDistanceMatrix({
-        origins: [origin],
-        destinations: coordinates,
-        travelMode: google.maps.TravelMode.WALKING,
-        unitSystem: google.maps.UnitSystem.METRIC
-    },
-    function (response, status) {
-        if (status !== google.maps.DistanceMatrixStatus.OK) {
-            console.log('Error:', status);
-        } else {
-            var l = response.rows[0].elements.length;
-            for(var i=0; i<l; i++){
-                var d = response.rows[0].elements[i].duration.value / 60;
-                console.log(c[i].id + ": "+Math.round(d));
-            }
-        }
-    });
-}*/
