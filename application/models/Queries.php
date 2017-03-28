@@ -10,7 +10,7 @@ class Queries extends CI_Model {
     public function get_jobs($page,$order_by,$city_id,$category_id,$edu_id,$salary,$work_time_id)
     {
         $offset = ($page - 1) * 30;
-        $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo,companies.average_salary, companies.high_credit_rating');
+        $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,url_id AS url,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo,companies.average_salary, companies.high_credit_rating');
         $this->db->from('jobs');
         $this->db->join('companies','companies.id = jobs.company_id');
 
@@ -77,7 +77,7 @@ class Queries extends CI_Model {
 
     public function get_jobs_by_ids($ids,$category_id = 0,$city_id = 0)
     {
-        $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo');
+        $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo, jobs.url_id AS u');
         $this->db->from('jobs');
         $this->db->join('companies','companies.id = jobs.company_id');
 
@@ -99,7 +99,7 @@ class Queries extends CI_Model {
     public function get_markers($category_id,$city_id,$edu_id,$salary,$work_time_id)
     {
         $this->db->select('markers.id AS mid, markers.lat, markers.lng, jobs.id AS jid,
-        companies.average_salary AS avg_sal, companies.high_credit_rating AS credit');
+        companies.average_salary AS avg_sal, companies.high_credit_rating AS credit, jobs.url_id AS u');
         $this->db->from('markers');
         $this->db->join('jobs', 'jobs.marker_id = markers.id');
         $this->db->join('companies','companies.id = jobs.company_id');
@@ -190,6 +190,12 @@ class Queries extends CI_Model {
             $this->db->where("salary_from >=", $salary);
         }
 
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function get_url_by_id($id){
+        $this->db->select("url")->from("urls")->where("id",$id);
         $query = $this->db->get();
         return $query->row();
     }

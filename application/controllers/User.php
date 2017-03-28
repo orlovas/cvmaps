@@ -105,8 +105,6 @@ class User extends CI_Controller {
         if ($this->form_validation->run() == FALSE) {
             $this->load->view('auth');
         } else {
-
-
             $email = $this->input->post('email');
             $password = $this->input->post('password');
             $password_repeat = $this->input->post('password_repeat');
@@ -115,7 +113,7 @@ class User extends CI_Controller {
              * Compare passwords for equality
              */
 
-            if(!$this->comparePass($password,$password_repeat)){
+           if(!$this->comparePass($password,$password_repeat)){
                 echo 'error, not equal passwords';
                 return false;
             }

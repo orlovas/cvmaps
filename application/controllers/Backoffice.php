@@ -20,12 +20,13 @@ class Backoffice extends CI_Controller
 
 			$user_id = $this->users->loginFromCookies($token);
 			if (isset($user_id)) {
-				echo $user_id . ' <a href="http://[::1]/cvm/index.php/user/logout">logout</a>';
+
 			} else {
 				$this->load->view('auth');
 			}
 
             $data["jobs"] = $this->jobs->getUserJobs($user_id);
+            $data["markers"] = $this->jobs->getUserJobs($user_id,true);
 		    $this->load->view('backoffice', $data);
 
 		} else {

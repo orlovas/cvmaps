@@ -134,7 +134,7 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
           <input type="range" class="sort-range" id="salary_from" name="salary_from" min="100" max="1200" step="50" value="100">
         </div>
         <div class="sort-column">
-          <label for="salary_from">Laikas iki darbo <span id="distance_value">35</span> min.</label>
+          <label for="distance">Laikas iki darbo <span id="distance_value">35</span> min.</label>
           <input type="range" class="sort-range" id="distance" name="distance" min="10" max="60" step="5" value="35">
         </div>
         </div>

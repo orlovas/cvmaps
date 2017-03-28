@@ -49,7 +49,6 @@ function initParam(confirm){
     confirm = typeof confirm !== 'undefined' ? confirm : 0;
     $.ajax({
         type: "GET",
-        //url: "q/init_param/"+_city_id+"/"+_category_id+"/"+_edu_id+"/"+_salary+"/"+_work_time,
         url: CVMaps.paths.h,
         data: {
             c: "q",
@@ -95,7 +94,7 @@ function initList() {
     if(typeof j !== "undefined") {
         for (var i = start; i < end; i++) {
             var salary = salaryToString(j,i);
-            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a></li>');
+            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a></li>');
         }
     }
     $("#pg-current").html(_p);
@@ -130,7 +129,7 @@ function initList2() {
         for (var i = 0; i < j.length; i++) {
             if(j[i].hasOwnProperty("points")){
                 var salary = salaryToString(j,i);
-            list.append('<li><a href="" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right"><div class="offer-gauge"><div class="gauge-arrow" style="transform: rotate('+j[i].gauge+'deg)"></div></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">'+Math.floor(j[i].time)+' min.</div></div></a></li>');
+            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right"><div class="offer-gauge"><div class="gauge-arrow" style="transform: rotate('+j[i].gauge+'deg)"></div></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">'+Math.floor(j[i].time)+' min.</div></div></a></li>');
             }
 
         }
@@ -219,7 +218,9 @@ function getMarkers(){
                     lat: val.lat,
                     lng: val.lng,
                     avg: val.avg_sal,
-                    credit: val.credit});
+                    credit: val.credit,
+                    u: val.u
+                });
             });
             groupMarkers(c);
             initMap();
@@ -251,7 +252,8 @@ function getJobs(confirm){
                     company: val.company,
                     logo: val.logo,
                     salary_from: val.salary_from,
-                    salary_to: val.salary_to
+                    salary_to: val.salary_to,
+                    url: val.url
                 });
                 // Be sure all jobs pushed to j
                 if(key == response.length-1){
@@ -387,9 +389,9 @@ function renderMarkers(){
                                             var childs_arr_id = arrayObjectIndexOf(children,val.id,"id");
 
                                             if(childs_arr_id >= 0){
-                                                content += '<li><div style="color:'+children[childs_arr_id].color+'; font-size:'+(children[childs_arr_id].scale+5)+'px">'+val.title+'</div>';
+                                                content += '<li><div style="color:'+children[childs_arr_id].color+'; font-size:'+(children[childs_arr_id].scale+5)+'px"><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+val.u+'" target="_blank">'+val.title+'</a></div>';
                                             } else {
-                                                content += '<li><div>'+val.title+'</div>';
+                                                content += '<li><div><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+val.u+'" target="_blank">'+val.title+'</a></div>';
                                             }
 
                                             content += '<div class="m-company">'+val.company+'</div>';
@@ -403,7 +405,7 @@ function renderMarkers(){
 
                                  });
                             } else {
-                                content += response[0].title+'<div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div><a href="" class="m-button">Rodyti skelbimą</a>';
+                                content += response[0].title+'<div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+c[i].u+'" target="_blank" class="m-button">Parodyti skelbimą</a>';
                                 infoWindow.setContent(content);
                                 infoWindow.open(map, marker);
                             }
@@ -424,21 +426,26 @@ function renderMarkers(){
  */
 
 
+$("#category_id").on("change", function(){
+   _category_id = parseInt($("#category_id").val());
+    j = [];
+    initParam(true);
+    $("input[type=search]").val("");
 
-/*
-    Search by city
- */
-$("#city_id").on("change", function(){
-    _city_id = parseInt($("#city_id").val());
+});
+
+$("#work_time_id").on("change", function(){
+    _work_time = parseInt($(this).val());
     j = [];
     initParam(true);
 });
 
-$("#work_time").on("change", function(){
-    _work_time = parseInt($("#work_time").val());
+$("#edu_id").on("change", function(){
+    _edu_id = parseInt($(this).val());
     j = [];
     initParam(true);
 });
+
 
 $("#salary_from").on("input change", function(e){
     if(e.type === "input"){
@@ -449,55 +456,23 @@ $("#salary_from").on("input change", function(e){
         j = [];
         initParam(true);
     }
-/* var j_buffer = [];
-    for(var i=0; i< j.length; i++){
-        if(j[i].hasOwnProperty("time")){
-            j_buffer.push({id: j[i].id, time:j[i].time});
+});
+
+$("#distance").on("input change", function(e){
+    if(e.type === "input"){
+        $("#distance_value").html($(this).val());
+    } else {
+        var time = $(this).val();
+        $("#distance_value").html(time);
+        var distance = (((time / 60)  * 5.1) / 1.5) * 1000;
+        search_radius = Math.ceil(distance);
+        if(home_marker.length > 0){
+            placeMarkerAndPanTo(home_marker[0].position, map);
+        } else {
+            placeMarkerAndPanTo(map.getCenter(), map);
         }
     }
-
-    var c_buffer = [];
-        for (var i = 0; i < c.length; i++) {
-            if (c[i].nearest === 1) {
-                c_buffer.push(c[i].id);
-            }
-        }*/
 });
-
-$("#distance").on("change", function(){
-    var time = $("#distance").val();
-    $("#distance_value").html(time);
-    var distance = (((time / 60)  * 5.1) / 1.5) * 1000;
-    search_radius = Math.ceil(distance);
-    if(home_marker.length > 0){
-        placeMarkerAndPanTo(home_marker[0].position, map);
-    } else {
-        placeMarkerAndPanTo(map.getCenter(), map);
-    }
-
-
-});
-
-/*
-    Search by category
- */
-$("#category_id").on("change", function(){
-   _category_id = parseInt($("#category_id").val());
-    j = [];
-    initParam(true);
-    $("input[type=search]").val("");
-
-});
-
-/*$("#dd_category_id > a").on("click", function(event){
-    event.preventDefault();
-   _category_id = parseInt($(this).attr('href').substr(1));
-    $("input[type=search]").val($(this).text());
-    j = [];
-    initParam(true);
-
-});*/
-
 
 /*
 #    Home setter functions  #
@@ -601,6 +576,8 @@ function getDuration(origin){
         destinations = destinations.slice(0, -1);
     } else {
         console.log("No work here");
+        restoreJobRanking();
+        loading(100);
         return;
     }
     loading(10);
@@ -633,7 +610,7 @@ function getDuration(origin){
 
       },
         error: function() {
-            console.log("Too many requests");
+            alert("Įvyko klaida. Galimos priežastys: 1) viršytas leistinų skelbimų skaičius. Pabandykite sumažinti laiką iki darbo (atstumą); 2) viršytas leistinų paieškų per sekundę. Pabandykite dar kartą po 10-15 sek.");
         }
     });
 }
@@ -677,6 +654,229 @@ function showOnlyNearest(){
     markerCluster = new MarkerClusterer(map, new_markers, cluster_options);
 }
 
+function restoreJobRanking(){
+	for(var i=0; i<markers.length; i++){
+		if(markers[i].hasOwnProperty("points")){
+			delete markers[i].points;
+		}
+
+        if(typeof markers[i].icon === "string"){
+            markers[i].setIcon(CVMaps.paths.i() + "marker_plus.png");
+        } else {
+            markers[i].setIcon({
+                path: google.maps.SymbolPath.CIRCLE,
+                        scale: 7,
+                        strokeColor: '#8bc34a',
+                        strokeOpacity: 0.2,
+                        strokeWeight: 12,
+                        fillColor: '#8bc34a',
+                        fillOpacity: 1
+            });
+        }
+
+	}
+
+    for(var i=0; i<j.length; i++){
+        if(j[i].hasOwnProperty("points")){
+			delete j[i].points;
+		}
+    }
+
+    children = [];
+}
+
+function jobRankingDelayed(){
+    setTimeout(function() { jobRanking(); }, 1000);
+}
+
+function jobRanking(){
+    // Return all markers', c[], j[] and other parameters to default
+	restoreJobRanking();
+
+    var data = [];
+
+    for(var i=0; i< c.length; i++){
+        if(c[i].nearest === 1){
+            var jid = c[i].id;
+            var j_arr_id = arrayObjectIndexOf(j,jid,"id");
+            data.push({
+                id: c[i].id,
+                distance: parseFloat(j[j_arr_id].time),
+                salary: parseFloat(j[j_arr_id].salary_from),
+                average_salary: parseFloat(c[i].avg),
+                credit: parseInt(c[i].credit)
+            });
+        }
+    }
+
+    if(data.length === 1){
+	        var mid = arrayObjectIndexOf(markers,data[0].id,"job_id");
+	        markers[mid].points = 1;
+	        markers[mid].setIcon({
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: 9,
+                    strokeColor: '#72ae2c',
+                    strokeOpacity: 0.2,
+                    strokeWeight: 12,
+                    fillColor: '#72ae2c',
+                    fillOpacity: 1
+                });
+	    return;
+    }
+
+    var weight = {
+        salary: 0.50,
+        distance: 0.25,
+        average_salary: 0.18,
+        credit: 0.07
+    };
+
+    var dl = data.length;
+
+    var mins = {
+        distance: []
+    };
+
+    var maxs = {
+        salary: [],
+        average_salary: [],
+        credit: []
+    };
+
+    for(var i=0; i<dl; i++){
+        maxs.salary[i] = data[i].salary;
+        mins.distance[i] = data[i].distance;
+        maxs.average_salary[i] = data[i].average_salary;
+        maxs.credit[i] = data[i].credit;
+    }
+
+    maxs.salary = Math.max.apply(Math,maxs.salary);
+    mins.distance = Math.min.apply(Math,mins.distance);
+    maxs.average_salary = Math.max.apply(Math,maxs.average_salary);
+    maxs.credit = Math.max.apply(Math,maxs.credit);
+
+    var salary = [];
+    var distance = [];
+    var average_salary = [];
+    var credit = [];
+    var result;
+
+    for(var i=0; i<dl; i++){
+        result = data[i].salary / maxs.salary;
+        salary.push(result);
+
+        result = mins.distance / data[i].distance;
+        distance.push(result);
+
+        result = data[i].average_salary / maxs.average_salary;
+        average_salary.push(result);
+
+        if(maxs.credit === 0){
+            result = 0;
+        } else {
+            result = data[i].credit / maxs.credit;
+        }
+
+        credit.push(result);
+    }
+
+    for(var i=0; i<dl; i++){
+        result =
+            weight.salary * salary[i]
+            + weight.distance * distance[i]
+            + weight.average_salary * average_salary[i]
+            + weight.credit * credit[i];
+
+        data[i].points = round(result,4);
+    }
+
+    for(var i=0; i<data.length; i++){
+        var jid = arrayObjectIndexOf(j,data[i].id,"id");
+        j[jid].points = data[i].points;
+        if(hasChildren(data[i].id) || isChild(data[i].id)){
+            children.push({id: data[i].id, points: data[i].points});
+        } else {
+            var mid = arrayObjectIndexOf(markers,data[i].id,"job_id");
+            markers[mid].points = data[i].points;
+        }
+
+    }
+    loading(30);
+    scaleDownValues();
+    param.jobs = 0;
+    for(var i=0; i< j.length; i++){
+        if(j[i].hasOwnProperty("points")) param.jobs++;
+    }
+    initList2(); // temporary
+    $("#color-scale").show();
+    loading(10);
+
+}
+
+// https://stackoverflow.com/questions/11121012/how-to-scale-down-the-values-so-they-could-fit-inside-the-min-and-max-values
+function scaleDownValues(){
+	var min = 15,
+		max = 100,
+		ratio;
+    var smin = 6,
+        smax = 12,
+        sratio;
+    var gmin = 0,
+        gmax = 180,
+        gratio;
+
+	var data = [];
+	for(var i=0; i<markers.length; i++){
+		if(markers[i].hasOwnProperty("points")){
+			data.push({id: i, points: markers[i].points});
+		}
+	}
+
+    for(var i=0; i<children.length; i++){
+		if(children[i].hasOwnProperty("points")){
+			data.push({id: children[i].id, points: children[i].points, not_marker: true});
+		}
+	}
+
+	var max_value = Math.max.apply(Math,data.map(function(o){return o.points;})),
+		min_value = Math.min.apply(Math,data.map(function(o){return o.points;}));
+
+	ratio = (max - min)/(max_value - min_value);
+    sratio = (smax - smin)/(max_value - min_value);
+    gratio = (gmax - gmin)/(max_value - min_value);
+
+	for(var i=0; i<data.length; i++){
+		var value = min + ratio * (data[i].points - min_value);
+        var gvalue = gmin + gratio * (data[i].points - min_value);
+		var mid = data[i].id;
+        var jid = markers[mid].job_id;
+        var job_arr_id = arrayObjectIndexOf(j,jid.toString(),"id");
+        j[job_arr_id].gauge = Math.round(gvalue);
+		var color = rgb2hex(valueToColor(value));
+
+		var scale_value = smin + sratio * (data[i].points - min_value);
+        if(data[i].hasOwnProperty("not_marker")){
+            var id = arrayObjectIndexOf(children,data[i].id,"id");
+            children[id].color = color;
+            children[id].scale = scale_value;
+        } else {
+            markers[mid].setIcon(
+                {
+                    path: google.maps.SymbolPath.CIRCLE,
+                    scale: scale_value,
+                    strokeColor: color,
+                    strokeOpacity: 0.2,
+                    strokeWeight: 12,
+                    fillColor: color,
+                    fillOpacity: 1
+                }
+            );
+        }
+
+        //markers[mid].set('labelContent', j[job_arr_id].salary_from + "-" + j[job_arr_id].salary_to +" €");
+	}
+    loading(20);
+}
 
 /*
 #    Event handlers   #
@@ -862,164 +1062,7 @@ function countPages(){
     return Math.ceil(param.jobs / 30);
 }
 
-function restoreJobRanking(){
-	for(var i=0; i<markers.length; i++){
-		if(markers[i].hasOwnProperty("points")){
-			delete markers[i].points;
-		}
 
-        if(typeof markers[i].icon === "string"){
-            markers[i].setIcon(CVMaps.paths.i() + "marker_plus.png");
-        } else {
-            markers[i].setIcon({
-                path: google.maps.SymbolPath.CIRCLE,
-                        scale: 7,
-                        strokeColor: '#8bc34a',
-                        strokeOpacity: 0.2,
-                        strokeWeight: 12,
-                        fillColor: '#8bc34a',
-                        fillOpacity: 1
-            });
-        }
-
-	}
-
-    for(var i=0; i<j.length; i++){
-        if(j[i].hasOwnProperty("points")){
-			delete j[i].points;
-		}
-    }
-
-    children = [];
-}
-
-function jobRankingDelayed(){
-    setTimeout(function() { jobRanking(); }, 1000);
-}
-
-function jobRanking(){
-    // Return all markers', c[], j[] and other parameters to default
-	restoreJobRanking();
-
-    var data = [];
-
-    for(var i=0; i< c.length; i++){
-        if(c[i].nearest === 1){
-            var jid = c[i].id;
-            var j_arr_id = arrayObjectIndexOf(j,jid,"id");
-            data.push({
-                id: c[i].id,
-                distance: parseFloat(j[j_arr_id].time),
-                salary: parseFloat(j[j_arr_id].salary_from),
-                average_salary: parseFloat(c[i].avg),
-                credit: parseInt(c[i].credit)
-            });
-        }
-    }
-
-    if(data.length === 1){
-	        var mid = arrayObjectIndexOf(markers,data[0].id,"job_id");
-	        markers[mid].points = 1;
-	        markers[mid].setIcon({
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: 9,
-                    strokeColor: '#72ae2c',
-                    strokeOpacity: 0.2,
-                    strokeWeight: 12,
-                    fillColor: '#72ae2c',
-                    fillOpacity: 1
-                });
-	    return;
-    }
-
-    var weight = {
-        salary: 0.50,
-        distance: 0.25,
-        average_salary: 0.18,
-        credit: 0.07
-    };
-
-    var dl = data.length;
-
-    var mins = {
-        distance: []
-    };
-
-    var maxs = {
-        salary: [],
-        average_salary: [],
-        credit: []
-    };
-
-    for(var i=0; i<dl; i++){
-        maxs.salary[i] = data[i].salary;
-        mins.distance[i] = data[i].distance;
-        maxs.average_salary[i] = data[i].average_salary;
-        maxs.credit[i] = data[i].credit;
-    }
-
-    maxs.salary = Math.max.apply(Math,maxs.salary);
-    mins.distance = Math.min.apply(Math,mins.distance);
-    maxs.average_salary = Math.max.apply(Math,maxs.average_salary);
-    maxs.credit = Math.max.apply(Math,maxs.credit);
-
-    var salary = [];
-    var distance = [];
-    var average_salary = [];
-    var credit = [];
-    var result;
-
-    for(var i=0; i<dl; i++){
-        result = data[i].salary / maxs.salary;
-        salary.push(result);
-
-        result = mins.distance / data[i].distance;
-        distance.push(result);
-
-        result = data[i].average_salary / maxs.average_salary;
-        average_salary.push(result);
-
-        if(maxs.credit === 0){
-            result = 0;
-        } else {
-            result = data[i].credit / maxs.credit;
-        }
-
-        credit.push(result);
-    }
-
-    for(var i=0; i<dl; i++){
-        result =
-            weight.salary * salary[i]
-            + weight.distance * distance[i]
-            + weight.average_salary * average_salary[i]
-            + weight.credit * credit[i];
-
-        data[i].points = round(result,4);
-    }
-
-    for(var i=0; i<data.length; i++){
-        var jid = arrayObjectIndexOf(j,data[i].id,"id");
-        j[jid].points = data[i].points;
-        if(hasChildren(data[i].id) || isChild(data[i].id)){
-            children.push({id: data[i].id, points: data[i].points});
-        } else {
-            var mid = arrayObjectIndexOf(markers,data[i].id,"job_id");
-            markers[mid].points = data[i].points;
-        }
-
-    }
-    loading(30);
-    scaleDownValues();
-    param.jobs = 0;
-    for(var i=0; i< j.length; i++){
-        if(j[i].hasOwnProperty("points")) param.jobs++;
-    }
-    initList2(); // temporary
-    $("#color-scale").show();
-    loading(10);
-
-}
 
 function hasChildren(cid){
     var id = arrayObjectIndexOf(c,cid,"id");
@@ -1055,71 +1098,6 @@ function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
 
 function deg2rad(deg) {
   return deg * (Math.PI/180)
-}
-
-// https://stackoverflow.com/questions/11121012/how-to-scale-down-the-values-so-they-could-fit-inside-the-min-and-max-values
-function scaleDownValues(){
-	var min = 15,
-		max = 100,
-		ratio;
-    var smin = 6,
-        smax = 12,
-        sratio;
-    var gmin = 0,
-        gmax = 180,
-        gratio;
-
-	var data = [];
-	for(var i=0; i<markers.length; i++){
-		if(markers[i].hasOwnProperty("points")){
-			data.push({id: i, points: markers[i].points});
-		}
-	}
-
-    for(var i=0; i<children.length; i++){
-		if(children[i].hasOwnProperty("points")){
-			data.push({id: children[i].id, points: children[i].points, not_marker: true});
-		}
-	}
-
-	var max_value = Math.max.apply(Math,data.map(function(o){return o.points;})),
-		min_value = Math.min.apply(Math,data.map(function(o){return o.points;}));
-
-	ratio = (max - min)/(max_value - min_value);
-    sratio = (smax - smin)/(max_value - min_value);
-    gratio = (gmax - gmin)/(max_value - min_value);
-
-	for(var i=0; i<data.length; i++){
-		var value = min + ratio * (data[i].points - min_value);
-        var gvalue = gmin + gratio * (data[i].points - min_value);
-		var mid = data[i].id;
-        var jid = markers[mid].job_id;
-        var job_arr_id = arrayObjectIndexOf(j,jid.toString(),"id");
-        j[job_arr_id].gauge = Math.round(gvalue);
-		var color = rgb2hex(valueToColor(value));
-
-		var scale_value = smin + sratio * (data[i].points - min_value);
-        if(data[i].hasOwnProperty("not_marker")){
-            var id = arrayObjectIndexOf(children,data[i].id,"id");
-            children[id].color = color;
-            children[id].scale = scale_value;
-        } else {
-            markers[mid].setIcon(
-                {
-                    path: google.maps.SymbolPath.CIRCLE,
-                    scale: scale_value,
-                    strokeColor: color,
-                    strokeOpacity: 0.2,
-                    strokeWeight: 12,
-                    fillColor: color,
-                    fillOpacity: 1
-                }
-            );
-        }
-
-        //markers[mid].set('labelContent', j[job_arr_id].salary_from + "-" + j[job_arr_id].salary_to +" €");
-	}
-    loading(20);
 }
 
 function valueToColor(val) {
@@ -1160,7 +1138,7 @@ var loadbar = $(".loading");
 var loadval = 0;
 
 function loading(val){
-    loadbar.show();
+    /*loadbar.show();
     loadval += val;
     var width = loadval + "%";
     loadbar.css("width",width);
@@ -1168,5 +1146,5 @@ function loading(val){
         loadbar.fadeOut(1000, function(){
             loadval = 0;
         });
-    }
+    }*/
 }

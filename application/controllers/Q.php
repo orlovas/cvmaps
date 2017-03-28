@@ -95,4 +95,10 @@ class Q extends CI_Controller {
             $city_id,$category_id,$edu_id,$salary,$work_time_id
         )));
     }
+
+    public function redirect(){
+        $id = $this->input->get('u',TRUE);
+        $url = $this->queries->get_url_by_id($id);
+        redirect($url->url);
+    }
 }

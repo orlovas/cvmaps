@@ -8,14 +8,24 @@ class Jobs extends CI_Model
         $this->load->database();
     }
 
-    public function getUserJobs($user_id)
+    public function getUserJobs($user_id, $json = false)
     {
-        $this->db->select("id, title, created, updated, expires, address, active");
-        $this->db->from('jobs');
-        $this->db->where('user_id',$user_id);
+        if($json){
+            $this->db->select('markers.id AS mid, markers.lat, markers.lng, jobs.id AS jid');
+            $this->db->from('markers');
+            $this->db->join('jobs', 'jobs.marker_id = markers.id');
+            $this->db->join('companies','companies.id = jobs.company_id');
+            $this->db->where('jobs.user_id',$user_id);
 
-        $query = $this->db->get();
-        return $query->result_array();
+        } else {
+            $this->db->select("id, title, created, updated, expires, address, active");
+            $this->db->from('jobs');
+            $this->db->where('user_id',$user_id);
+
+        }
+
+            $query = $this->db->get();
+            return $query->result_array();
     }
 
     public function add_job(

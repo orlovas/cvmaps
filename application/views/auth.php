@@ -8,7 +8,7 @@
 
 echo validation_errors();
 
-echo form_open('user/register');
+echo form_open('?c=user&m=register');
 
 ?>
 <label for="email">El. paštas:</label>
@@ -29,7 +29,7 @@ echo form_close();
 <?php
 echo validation_errors();
 
-echo form_open('user/login');
+echo form_open('?c=user&m=login');
 
 ?>
 <label for="email">El. paštas:</label>
