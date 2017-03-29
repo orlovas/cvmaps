@@ -49,14 +49,12 @@
     <?php foreach ($jobs as $item):?>
     <tr>
         <td>
-            <b><a href=""><?php echo $item['title']; ?></a></b>
-            <p><?php echo $item['address']; ?></p>
-            <code></code>
-            <span></span>
+            <b<a href="index.php?c=backoffice&m=edit_job&id=<?php echo $item['id'] ?>"><?php echo $item['title']; ?></a></b>
+            <div><small><?php echo $item['address']; ?></small></div>
         </td>
         <td></td>
         <td></td>
-        <td><a href="">edit</td>
+        <td><a href="index.php?c=backoffice&m=edit_job&id=<?php echo $item['id'] ?>">edit</a></td>
 
     </tr>
     <?php endforeach; ?>
