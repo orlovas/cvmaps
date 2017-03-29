@@ -20,9 +20,8 @@
         src="https://code.jquery.com/jquery-1.12.4.min.js"
         integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
         crossorigin="anonymous"></script>
-
-  <!--[if lte IE 8]>
-    <link rel="stylesheet" href="<?php echo base_url(); ?>static/css/main.ie.css">
+  <!--[if IE]>
+    <style>.sort-row{padding-bottom:0!important}</style>
     <script src="<?php echo base_url(); ?>static/js/main.ie.js"></script>
   <![endif]-->
 </head>

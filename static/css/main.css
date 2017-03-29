@@ -837,10 +837,9 @@ input[type=range]::-ms-fill-upper {
 
 }
 input[type=range]::-ms-thumb {
-
-  height: 36px;
-  width: 16px;
-  border-radius: 3px;
+  height: 14px;
+  width: 14px;
+  border-radius: 50%;
   background: #ffffff;
   cursor: pointer;
 }
@@ -849,6 +848,10 @@ input[type=range]:focus::-ms-fill-lower {
 }
 input[type=range]:focus::-ms-fill-upper {
   background: #81c4e8;
+}
+
+.sort-range{
+    padding: 0;
 }
 
 #color-scale{
