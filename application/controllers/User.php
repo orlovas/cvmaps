@@ -86,6 +86,7 @@ class User extends CI_Controller {
                     );
 
                     $this->users->writeToken($token,$prelogin[0]['id'],$expire);
+                    redirect();
                 } else {
                     echo "not correct pass";
                 }
@@ -119,7 +120,7 @@ class User extends CI_Controller {
             }
 
             if($this->users->register($email,$password,1,1,1)){
-                echo 'registered';
+                redirect();
 
             } else {
                 echo 'error';
@@ -149,7 +150,7 @@ class User extends CI_Controller {
         session_destroy();
 
         $this->users->deleteToken($token);
-
+        redirect();
         return true;
     }
 

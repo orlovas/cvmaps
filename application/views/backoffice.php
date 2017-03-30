@@ -1,3 +1,4 @@
+
 <!doctype html>
 <html lang="lt">
 <head>
@@ -41,7 +42,7 @@
       </ul>
   </nav>
     <div class="header__right">
-        <a href="http://[::1]/cvm/index.php?c=user&m=logout">logout</a>
+        <a href="http://localhost/cvm/index.php?c=user&m=logout">logout</a>
     </div>
 </header>
 <?php if(!is_null($company_id)): ?>
