@@ -1,7 +1,5 @@
 <?php
-// Todo: remove old markers and old url after edit;
-// Todo: add company_id;
-// Todo: nemnozhko pererabotat delete_marker s id na marker_id;
+// Todo: ne derzhit sessiju;
 class Backoffice extends CI_Controller
 {
     private $user_id;
@@ -11,11 +9,13 @@ class Backoffice extends CI_Controller
         $this->load->model('queries');
         $this->load->model('users');
         $this->load->model('jobs');
+        $this->load->model('companies');
         $this->load->helper('url_helper');
         $this->load->library('session');
         $this->load->helper('cookie');
         $this->load->library('form_validation');
         $this->user_id = $this->getUserId();
+        $this->company_id = $this->getUserCompanyId();
     }
 
     public function index(){
@@ -28,12 +28,109 @@ class Backoffice extends CI_Controller
             }
             $data["jobs"] = $this->jobs->getUserJobs($user_id);
             $data["markers"] = $this->jobs->getUserJobs($user_id,true);
+            $data["company_id"] = $this->company_id;
             $this->load->view('backoffice', $data);
 
         } else {
             $this->load->view('auth');
         }
 
+    }
+
+    public function create_company()
+    {
+        $this->form_validation->set_rules('name', 'name', 'trim|required');
+        $this->form_validation->set_rules('average_salary', 'average salary', 'trim|required|numeric');
+        $this->form_validation->set_rules('high_credit_rating', 'high credit rating', 'trim|required');
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->load->view('createcompany');
+        } else {
+            $name = $this->input->post('name');
+            $average_salary = $this->input->post('average_salary');
+            $high_credit_rating = $this->input->post('high_credit_rating');
+            $logo = $this->input->post('logo');
+            if($logo !== "default.png"){
+                $logo = $this->upload_logo('logo');
+            }
+
+            if($this->companies->create_company($this->user_id,$name,$average_salary,$high_credit_rating,$logo)){
+                redirect("index.php?c=backoffice");
+            } else {
+                var_dump($this->db->error());
+            }
+
+        }
+    }
+
+    public function edit_company()
+    {
+        $this->form_validation->set_rules('name', 'name', 'trim|required');
+        $this->form_validation->set_rules('average_salary', 'average salary', 'trim|required|numeric');
+        $this->form_validation->set_rules('high_credit_rating', 'high credit rating', 'trim|required');
+
+        $company_id = $this->input->get("id");
+
+        if(!$this->users->confirm_user(["type"=>"companies","id"=>$company_id],$this->user_id)) return false;
+        $data = $this->companies->get_company($company_id);
+
+        if ($this->form_validation->run() == FALSE) {
+            $this->load->view('editcompany', $data);
+        } else {
+            $name = $this->input->post('name');
+            $average_salary = $this->input->post('average_salary');
+            $high_credit_rating = $this->input->post('high_credit_rating');
+            $logo = $this->input->post('logo');
+            if(!$logo){
+                $this->delete_old_logo($data->logo);
+                $logo = $this->upload_logo('logo');
+            }
+
+            if($this->companies->edit_company($company_id,$name,$average_salary,$high_credit_rating,$logo)){
+                $data = $this->companies->get_company($company_id);
+                $this->load->view('editcompany', $data);
+            } else {
+                var_dump($this->db->error());
+            }
+
+        }
+    }
+
+    private function upload_logo($logo){
+        $config['upload_path']          = 'static/images/l/';
+        $config['allowed_types']        = 'gif|jpg|png|jpeg|tiff';
+        $config['max_size']             = 2048;
+        $config['max_width']            = 2048;
+        $config['max_height']           = 2048;
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload($logo)) {
+            $error = array('error' => $this->upload->display_errors());
+            var_dump($error);
+            return false;
+        } else {
+            $data = array('upload_data' => $this->upload->data());
+
+            $config['image_library'] = 'gd2';
+            $config['source_image'] = $this->upload->data('full_path');
+            $config['maintain_ratio'] = TRUE;
+            $config['width']         = 74;
+            $config['height']       = 74;
+
+            $this->load->library('image_lib', $config);
+
+            if(!$this->image_lib->resize()){
+                echo $this->image_lib->display_errors();
+                return false;
+            }
+
+            return $this->upload->data('file_name');
+        }
+    }
+
+    private function delete_old_logo($logo){
+        unlink("static/images/l/".$logo);
     }
 
     public function add_job()
@@ -63,7 +160,7 @@ class Backoffice extends CI_Controller
             $salary_from = $this->input->post("salary_from");
             $salary_to = $this->input->post("salary_to");
             $url = $this->input->post('url');
-            $company_id = 1;
+            $company_id = $this->company_id;
             $user_id = $this->user_id;
             $url_id = $this->jobs->add_url($url);
             $marker_id = $this->jobs->add_marker($this->getCoordinates($address));
@@ -100,7 +197,7 @@ class Backoffice extends CI_Controller
 
         $id = $this->input->get("id");
 
-        if(!$this->users->confirm_user($id,$this->user_id)) return false;
+        if(!$this->users->confirm_user(["type"=>"jobs","id"=>$id],$this->user_id)) return false;
 
         $data = $this->jobs->get_job_by_id($id);
         if(!$data){
@@ -156,7 +253,7 @@ class Backoffice extends CI_Controller
     public function delete_job(){
         $id = $this->input->get("id");
 
-        if(!$this->users->confirm_user($id,$this->user_id)) return false;
+        if(!$this->users->confirm_user(["type"=>"jobs","id"=>$id],$this->user_id)) return false;
 
         if($this->jobs->delete_job($id)){
             $this->index();
@@ -204,7 +301,23 @@ class Backoffice extends CI_Controller
     }
 
     private function getUserId(){
-        return $this->users->loginFromCookies($_COOKIE["token"]);
+        $id = 0;
+        if(isset($_COOKIE["token"]) && !empty($_COOKIE["token"])){
+            $id = $this->users->loginFromCookies($_COOKIE["token"]);
+        }
+        return $id;
+    }
+
+    private function getUserCompanyId(){
+        $id = NULL;
+
+        if(isset($this->user_id) && !empty($this->user_id)){
+            $query = $this->companies->get_company_id($this->user_id);
+            if(!is_null($query)){
+                $id = $query->id;
+            }
+        }
+        return $id;
     }
 
 }

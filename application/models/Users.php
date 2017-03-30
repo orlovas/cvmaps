@@ -86,9 +86,9 @@ class Users extends CI_Model {
         }
     }
 
-    public function confirm_user($id,$user_id)
+    public function confirm_user($data,$user_id)
     {
-        $query = $this->db->select("address")->from('jobs')->where(array("id"=>$id,"user_id"=>$user_id))->get()->row();
+        $query = $this->db->select("id")->from($data["type"])->where(array("id"=>$data["id"],"user_id"=>$user_id))->get()->row();
         if($query) return true;
     }
 

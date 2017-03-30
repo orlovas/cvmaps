@@ -44,7 +44,9 @@
         <a href="http://[::1]/cvm/index.php?c=user&m=logout">logout</a>
     </div>
 </header>
+<?php if(!is_null($company_id)): ?>
 <h2>Mano skelbimai</h2>
+    <a href="index.php?c=backoffice&m=add_job">Sukurti darbo skelbimą</a>
 <table>
     <?php foreach ($jobs as $item):?>
     <tr>
@@ -54,7 +56,7 @@
         </td>
         <td></td>
         <td></td>
-        <td><a href="index.php?c=backoffice&m=edit_job&id=<?php echo $item['id'] ?>">edit</a></td>
+        <td><a href="index.php?c=backoffice&m=edit_job&id=<?php echo $item['id'] ?>">edit</a><a href="index.php?c=backoffice&m=delete_job&id=<?php echo $item['id'] ?>">delete</a></td>
 
     </tr>
     <?php endforeach; ?>
@@ -71,5 +73,8 @@
 
     <script src="<?php echo base_url(); ?>static/js/main_backoffice.js?v=1"></script>
 	<script src="//maps.googleapis.com/maps/api/js?key=AIzaSyAJhXhTIxa5iUsy3FQA5bERrbbxdEZ7Cls&libraries=places&language=lt&region=LT&callback=initMap"></script>
+<?php else: ?>
+    <div><a href="index.php?c=backoffice&m=create_company">Įrašykite savo įmonę</a></div>
+<?php endif; ?>
 </body>
 </html>
