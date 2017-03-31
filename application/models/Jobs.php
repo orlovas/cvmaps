@@ -11,14 +11,15 @@ class Jobs extends CI_Model
     public function getUserJobs($user_id, $json = false)
     {
         if($json){
-            $this->db->select('markers.id AS mid, markers.lat, markers.lng, jobs.id AS jid');
+            $this->db->select('markers.id AS mid, markers.lat, markers.lng, jobs.id AS jid,
+        companies.average_salary AS avg_sal, companies.high_credit_rating AS credit, jobs.url_id AS u');
             $this->db->from('markers');
             $this->db->join('jobs', 'jobs.marker_id = markers.id');
             $this->db->join('companies','companies.id = jobs.company_id');
             $this->db->where('jobs.user_id',$user_id);
 
         } else {
-            $this->db->select("id, title, created, updated, expires, address, active");
+            $this->db->select("id, title, marker_id, address");
             $this->db->from('jobs');
             $this->db->where('user_id',$user_id);
 
@@ -26,6 +27,13 @@ class Jobs extends CI_Model
 
         $query = $this->db->get();
         return $query->result_array();
+    }
+
+    public function getUserJobsInit($user_id)
+    {
+        $this->db->select("COUNT(id) AS jobs")->from("jobs")->where('user_id',$user_id);
+        $query = $this->db->get();
+        return $query->row();
     }
 
     public function add_job(

@@ -43,7 +43,9 @@ class Users extends CI_Model {
 
         $this->db->insert('users', $data);
 
-        return true;
+
+
+        return $this->db->insert_id();
 
     }
 

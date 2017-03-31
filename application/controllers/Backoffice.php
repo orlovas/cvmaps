@@ -1,5 +1,5 @@
 <?php
-// Todo: ne derzhit sessiju;
+
 class Backoffice extends CI_Controller
 {
     private $user_id;
@@ -69,10 +69,8 @@ class Backoffice extends CI_Controller
         $this->form_validation->set_rules('average_salary', 'average salary', 'trim|required|numeric');
         $this->form_validation->set_rules('high_credit_rating', 'high credit rating', 'trim|required');
 
-        $company_id = $this->input->get("id");
-
-        if(!$this->users->confirm_user(["type"=>"companies","id"=>$company_id],$this->user_id)) return false;
-        $data = $this->companies->get_company($company_id);
+        if(!$this->users->confirm_user(["type"=>"companies","id"=>$this->company_id],$this->user_id)) return false;
+        $data = $this->companies->get_company($this->company_id);
 
         if ($this->form_validation->run() == FALSE) {
             $this->load->view('editcompany', $data);
@@ -86,9 +84,8 @@ class Backoffice extends CI_Controller
                 $logo = $this->upload_logo('logo');
             }
 
-            if($this->companies->edit_company($company_id,$name,$average_salary,$high_credit_rating,$logo)){
-                $data = $this->companies->get_company($company_id);
-                $this->load->view('editcompany', $data);
+            if($this->companies->edit_company($this->company_id,$name,$average_salary,$high_credit_rating,$logo)){
+                redirect();
             } else {
                 var_dump($this->db->error());
             }
@@ -140,6 +137,7 @@ class Backoffice extends CI_Controller
         $this->form_validation->set_rules('address', 'Address', 'trim|required');
         $this->form_validation->set_rules('category_id', 'Darbo sritis', 'trim|required');
         $this->form_validation->set_rules('city_id', 'Miestas', 'trim|required');
+        $this->form_validation->set_rules('edu_id', 'Issilavinimas', 'trim|required');
         $this->form_validation->set_rules('salary_from', 'Atlyginimas nuo', 'trim|numeric');
         $this->form_validation->set_rules('salary_to', 'Atlyginimas iki', 'trim|numeric');
         $this->form_validation->set_rules('url', 'URL', 'trim|required|valid_url');
@@ -147,7 +145,7 @@ class Backoffice extends CI_Controller
         if ($this->form_validation->run() == FALSE) {
             $data['categories'] = $this->queries->get_categories();
             $data['cities'] = $this->queries->get_cities();
-            $data['worker_types'] = $this->queries->get_worker_types();
+            $data['educations'] = $this->queries->get_educations();
             $this->load->view('addjob',$data);
         } else {
 
@@ -178,7 +176,7 @@ class Backoffice extends CI_Controller
                 $url_id,
                 $marker_id
             )){
-                echo 'job added';
+                redirect();
 
             } else {
                 var_dump($this->db->error());

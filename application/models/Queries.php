@@ -1,5 +1,4 @@
 <?php
-// TODO: nemnogo otlichajutsia rezultaty get_jobs i get_markers
 class Queries extends CI_Model {
 
     public function __construct()
@@ -7,10 +6,10 @@ class Queries extends CI_Model {
         $this->load->database();
     }
 
-    public function get_jobs($page,$order_by,$city_id,$category_id,$edu_id,$salary,$work_time_id)
+    public function get_jobs($page,$order_by,$city_id,$category_id,$edu_id,$salary,$work_time_id,$user_id=0)
     {
         $offset = ($page - 1) * 30;
-        $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,url_id AS url,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo,companies.average_salary, companies.high_credit_rating');
+        $this->db->select('jobs.id,company_id,IF(updated > created, updated, created) AS updated,url_id AS url,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo,companies.average_salary, companies.high_credit_rating');
         $this->db->from('jobs');
         $this->db->join('companies','companies.id = jobs.company_id');
 
@@ -31,7 +30,11 @@ class Queries extends CI_Model {
         }
 
         if(!empty($salary)){
-            $this->db->where("salary_from >=", $salary); // 500
+            $this->db->where("salary_from >=", $salary);
+        }
+
+        if($user_id != 0){
+            $this->db->where('jobs.user_id',$user_id);
         }
 
         if(!empty($order_by)){
@@ -57,7 +60,7 @@ class Queries extends CI_Model {
 
     public function get_job_by_id($id,$category_id = 0,$city_id = 0)
     {
-        $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo');
+        $this->db->select('jobs.id,company_id,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo');
         $this->db->from('jobs');
         $this->db->join('companies','companies.id = jobs.company_id');
 
@@ -96,7 +99,7 @@ class Queries extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_markers($category_id,$city_id,$edu_id,$salary,$work_time_id)
+    public function get_markers($category_id,$city_id,$edu_id,$salary,$work_time_id,$user_id=0)
     {
         $this->db->select('markers.id AS mid, markers.lat, markers.lng, jobs.id AS jid,
         companies.average_salary AS avg_sal, companies.high_credit_rating AS credit, jobs.url_id AS u');
@@ -124,6 +127,10 @@ class Queries extends CI_Model {
             $this->db->where("salary_from >=", $salary);
         }
 
+        if($user_id != 0){
+            $this->db->where('jobs.user_id',$user_id);
+        }
+
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -144,10 +151,10 @@ class Queries extends CI_Model {
         return $query->result_array();
     }
 
-    public function get_worker_types()
+    public function get_educations()
     {
-        $this->db->select("id, type")
-            ->from("worker_types");
+        $this->db->select("id, name")
+            ->from("educations");
         $query = $this->db->get();
         return $query->result_array();
     }
@@ -165,8 +172,7 @@ class Queries extends CI_Model {
         return $query->result_array();
     }
 
-    public function init_param($city_id,$category_id,$edu_id,$salary,$work_time_id)
-
+    public function init_param($city_id,$category_id,$edu_id,$salary,$work_time_id,$user_id=0)
     {
         $this->db->select("COUNT(id) AS jobs")->from("jobs");
 
@@ -184,6 +190,10 @@ class Queries extends CI_Model {
 
         if($edu_id != 0){
             $this->db->where('jobs.edu_id',$edu_id);
+        }
+
+        if($user_id != 0){
+            $this->db->where('jobs.user_id',$user_id);
         }
 
         if(!empty($salary)){

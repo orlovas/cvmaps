@@ -15,10 +15,11 @@ class Q extends CI_Controller {
 		$edu_id = $this->input->get('edu_id', TRUE);
 		$work_time_id = $this->input->get('work_time_id', TRUE);
 		$salary = $this->input->get('salary', TRUE);
+		$user_id = $this->input->get('user_id', TRUE);
 
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode($this->queries->get_markers(
-            $category_id,$city_id,$edu_id,$salary,$work_time_id
+            $category_id,$city_id,$edu_id,$salary,$work_time_id,$user_id
         )));
     }
 
@@ -34,7 +35,7 @@ class Q extends CI_Controller {
 		$work_time_id = $this->input->get('work_time_id', TRUE);
 		$order_by = $this->input->get('order_by', TRUE);
 		$salary = $this->input->get('salary', TRUE);
-
+        $user_id = $this->input->get('user_id', TRUE);
 
         if(isset($page)
             && isset($order_by)
@@ -44,7 +45,7 @@ class Q extends CI_Controller {
             && isset($salary)) {
             $this->output->set_content_type('application/json');
             $this->output->set_output(json_encode($this->queries->get_jobs(
-                $page,$order_by,$city_id,$category_id,$edu_id,$salary,$work_time_id
+                $page,$order_by,$city_id,$category_id,$edu_id,$salary,$work_time_id,$user_id
             )));
         }
 
@@ -89,10 +90,11 @@ class Q extends CI_Controller {
 		$edu_id = $this->input->get('edu_id', TRUE);
 		$work_time_id = $this->input->get('work_time_id', TRUE);
 		$salary = $this->input->get('salary', TRUE);
+        $user_id = $this->input->get('user_id', TRUE);
 
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode($this->queries->init_param(
-            $city_id,$category_id,$edu_id,$salary,$work_time_id
+            $city_id,$category_id,$edu_id,$salary,$work_time_id,$user_id
         )));
     }
 

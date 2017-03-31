@@ -20,7 +20,8 @@ var c = []; // coordinates
 var j = []; // jobs
 var tp = 0; // total pages
 var param = {
-   jobs: 0
+    jobs: 0,
+    user_id: 0
 };
 var dp = []; // downloaded pages
 var home_marker = [];
@@ -57,7 +58,8 @@ function initParam(confirm){
             city_id: _city_id,
             edu_id: _edu_id,
             salary: _salary,
-            work_time_id: _work_time
+            work_time_id: _work_time,
+            user_id: param.user_id
         },
         success: function(p){
             param.jobs = p.jobs;
@@ -94,7 +96,7 @@ function initList() {
     if(typeof j !== "undefined") {
         for (var i = start; i < end; i++) {
             var salary = salaryToString(j,i);
-            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a></li>');
+            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a>' + (param.user_id !== 0 ? '<span id="edit-job" data-id="'+j[i].id+'">Redaguoti</span> <span id="delete-job" data-id="'+j[i].id+'">Pašalinti</span>' : '') + '</li>');
         }
     }
     $("#pg-current").html(_p);
@@ -139,7 +141,7 @@ function initList2() {
 }
 
 function initMap() {
-var cvMapsStyle=new google.maps.StyledMapType([{featureType:"administrative",elementType:"labels.text.fill",stylers:[{color:"#444444"}]},{featureType:"landscape",elementType:"all",stylers:[{color:"#f2f2f2"}]},{featureType:"poi",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"road",elementType:"all",stylers:[{saturation:-100},{lightness:45}]},{featureType:"road.highway",elementType:"all",stylers:[{visibility:"simplified"}]},{featureType:"road.arterial",elementType:"labels.icon",stylers:[{visibility:"off"}]},{featureType:"transit",elementType:"all",stylers:[{visibility:"off"}]},{featureType:"water",elementType:"all",stylers:[{color:"#46bcec"},{visibility:"on"}]}],{name:"CV Maps"});
+var cvMapsStyle=new google.maps.StyledMapType([{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#444444"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#f2f2f2"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#c0e4f3"},{"visibility":"on"}]}],{name:"CV Maps"});
 
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 54.694988, lng: 25.278570},
@@ -208,7 +210,8 @@ function getMarkers(){
             city_id: _city_id,
             edu_id: _edu_id,
             salary: _salary,
-            work_time_id: _work_time
+            work_time_id: _work_time,
+            user_id: param.user_id
         },
         success: function(response){
             $.each( response, function( key, val ) {
@@ -242,7 +245,8 @@ function getJobs(confirm){
             city_id: _city_id,
             edu_id: _edu_id,
             salary: _salary,
-            work_time_id: _work_time
+            work_time_id: _work_time,
+            user_id: param.user_id
         },
         success: function(response){
             $.each( response, function( key, val ) {

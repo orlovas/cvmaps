@@ -29,9 +29,13 @@ class Home extends CI_Controller {
             $token = $_COOKIE["token"];
 
             $user_id = $this->users->loginFromCookies($token);
+            /*$data["company_init"] = $this->jobs->getUserJobsInit($user_id);
             $data["jobs"] = $this->jobs->getUserJobs($user_id);
-            $data["markers"] = $this->jobs->getUserJobs($user_id,true);
+            $data["markers"] = $this->jobs->getUserJobs($user_id,true);*/
             $data["company"] = $this->companies->get_company($this->company_id);
+            $data['categories'] = $this->queries->get_categories();
+            $data['cities'] = $this->queries->get_cities();
+            $data['educations'] = $this->queries->get_educations();
         }
 
         $this->load->view('index',$data);

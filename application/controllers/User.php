@@ -5,6 +5,7 @@ class User extends CI_Controller {
     {
         parent::__construct();
         $this->load->model('users');
+        $this->load->model('companies');
         $this->load->helper('url_helper');
         $this->load->library('form_validation');
         $this->load->library('session');
@@ -102,6 +103,9 @@ class User extends CI_Controller {
         $this->form_validation->set_rules('email', 'Email', 'trim|required');
         $this->form_validation->set_rules('password', 'Password', 'trim|required');
         $this->form_validation->set_rules('password_repeat', 'Password Repeat', 'trim|required');
+        $this->form_validation->set_rules('name', 'name', 'trim|required');
+        $this->form_validation->set_rules('average_salary', 'average salary', 'trim|required|numeric');
+        $this->form_validation->set_rules('high_credit_rating', 'high credit rating', 'trim|required');
 
         if ($this->form_validation->run() == FALSE) {
             $this->load->view('auth');
@@ -118,13 +122,58 @@ class User extends CI_Controller {
                 echo 'error, not equal passwords';
                 return false;
             }
+            $register = $this->users->register($email,$password,1,1,1);
+            if(!is_null($register)){
+                $name = $this->input->post('name');
+                $average_salary = $this->input->post('average_salary');
+                $high_credit_rating = $this->input->post('high_credit_rating');
+                $logo = $this->input->post('logo');
+                if($logo !== "default.png"){
+                    $logo = $this->upload_logo('logo');
+                }
 
-            if($this->users->register($email,$password,1,1,1)){
-                redirect();
+                if($this->companies->create_company($register,$name,$average_salary,$high_credit_rating,$logo)){
+                    redirect();
+                } else {
+                    var_dump($this->db->error());
+                }
 
             } else {
                 echo 'error';
             }
+        }
+    }
+
+    private function upload_logo($logo){
+        $config['upload_path']          = 'static/images/l/';
+        $config['allowed_types']        = 'gif|jpg|png|jpeg|tiff';
+        $config['max_size']             = 2048;
+        $config['max_width']            = 2048;
+        $config['max_height']           = 2048;
+
+        $this->load->library('upload', $config);
+
+        if (!$this->upload->do_upload($logo)) {
+            $error = array('error' => $this->upload->display_errors());
+            var_dump($error);
+            return false;
+        } else {
+            $data = array('upload_data' => $this->upload->data());
+
+            $config['image_library'] = 'gd2';
+            $config['source_image'] = $this->upload->data('full_path');
+            $config['maintain_ratio'] = TRUE;
+            $config['width']         = 74;
+            $config['height']       = 74;
+
+            $this->load->library('image_lib', $config);
+
+            if(!$this->image_lib->resize()){
+                echo $this->image_lib->display_errors();
+                return false;
+            }
+
+            return $this->upload->data('file_name');
         }
     }
 

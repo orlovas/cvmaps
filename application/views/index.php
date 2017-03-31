@@ -26,62 +26,42 @@
   <![endif]-->
 </head>
 <body>
-<div class="loading"></div>
+
 <header class="header header--map">
   <div class="header__logo">
     <a href="">
-      <img src="<?php echo base_url(); ?>static/images/logo.svg" class="logo" width="210" height="37">
+      <img src="<?php echo base_url(); ?>static/images/logo.png" class="logo" width="201" height="32">
     </a>
   </div>
-  <nav class="header__menu">
-      <ul>
-        <li><a href="">Darbo skelbimai</a></li>
-        <li><a href="">Darbdaviams</a></li>
-        <li><a href="">Kontaktai</a></li>
-      </ul>
-  </nav>
+  <?php if(!is_null($company->id)): ?>
+  <div class="header__menu">
+    <ul>
+      <li id="create-job"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjI0cHgiIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDUxMCA1MTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMCA1MTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPGc+Cgk8ZyBpZD0iYWRkLWNpcmNsZSI+CgkJPHBhdGggZD0iTTI1NSwwQzExNC43NSwwLDAsMTE0Ljc1LDAsMjU1czExNC43NSwyNTUsMjU1LDI1NXMyNTUtMTE0Ljc1LDI1NS0yNTVTMzk1LjI1LDAsMjU1LDB6IE0zODIuNSwyODAuNWgtMTAydjEwMmgtNTF2LTEwMiAgICBoLTEwMnYtNTFoMTAydi0xMDJoNTF2MTAyaDEwMlYyODAuNXoiIGZpbGw9IiNGRkZGRkYiLz4KCTwvZz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" style="vertical-align: middle;"/></li>
+      <li id="jobs-switcher-my"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjI0cHgiIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDUxMCA1MTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMCA1MTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPGc+Cgk8ZyBpZD0id29yayI+CgkJPHBhdGggZD0iTTQ1OSwxMTQuNzVIMzU3di01MWwtNTEtNTFIMjA0bC01MSw1MXY1MUg1MWMtMjguMDUsMC01MSwyMi45NS01MSw1MXYyODAuNWMwLDI4LjA1LDIyLjk1LDUxLDUxLDUxaDQwOCAgICBjMjguMDUsMCw1MS0yMi45NSw1MS01MXYtMjgwLjVDNTEwLDEzNy43LDQ4Ny4wNSwxMTQuNzUsNDU5LDExNC43NXogTTMwNiwxMTQuNzVIMjA0di01MWgxMDJWMTE0Ljc1eiIgZmlsbD0iI0ZGRkZGRiIvPgoJPC9nPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" style="vertical-align: middle;"/></li>
+      <li id="jobs-switcher-all" style="display: none;"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjI0cHgiIGhlaWdodD0iMjRweCIgdmlld0JveD0iMCAwIDUxMCA1MTAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDUxMCA1MTA7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPGc+Cgk8ZyBpZD0id29yayI+CgkJPHBhdGggZD0iTTQ1OSwxMTQuNzVIMzU3di01MWwtNTEtNTFIMjA0bC01MSw1MXY1MUg1MWMtMjguMDUsMC01MSwyMi45NS01MSw1MXYyODAuNWMwLDI4LjA1LDIyLjk1LDUxLDUxLDUxaDQwOCAgICBjMjguMDUsMCw1MS0yMi45NSw1MS01MXYtMjgwLjVDNTEwLDEzNy43LDQ4Ny4wNSwxMTQuNzUsNDU5LDExNC43NXogTTMwNiwxMTQuNzVIMjA0di01MWgxMDJWMTE0Ljc1eiIgZmlsbD0iI0ZGREE0NCIvPgoJPC9nPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" style="vertical-align: middle;"/></li>
+    </ul>
+  </div>
+  <?php endif; ?>
+
   <div class="header__right">
     <?php if(is_null($company->id)): ?>
     <a class="btn btn--medium btn--silver" id="not-authorized"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4IiB2aWV3Qm94PSIwIDAgNDU5IDQ1OSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDU5IDQ1OTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8Zz4KCTxnIGlkPSJleGl0LXRvLWFwcCI+CgkJPHBhdGggZD0iTTE4MS4wNSwzMjEuM2wzNS43LDM1LjdsMTI3LjUtMTI3LjVMMjE2Ljc1LDEwMmwtMzUuNywzNS43bDY2LjMsNjYuM0gwdjUxaDI0Ny4zNUwxODEuMDUsMzIxLjN6IE00MDgsMEg1MSAgICBDMjIuOTUsMCwwLDIyLjk1LDAsNTF2MTAyaDUxVjUxaDM1N3YzNTdINTFWMzA2SDB2MTAyYzAsMjguMDUsMjIuOTUsNTEsNTEsNTFoMzU3YzI4LjA1LDAsNTEtMjIuOTUsNTEtNTFWNTEgICAgQzQ1OSwyMi45NSw0MzYuMDUsMCw0MDgsMHoiIGZpbGw9IiMwMDAwMDAiLz4KCTwvZz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K"width="14" style="vertical-align: middle;
 margin-bottom: 2px;
 margin-right: 3px;" /> Prisijungti / Registruotis</a>
       <div class="authorize">
-        <form>
-        <label for="email">El. paštas:</label>
-        <input type="email" name="email" value="">
-
-        <label for="password">Slaptažodis:</label>
-        <input type="password" name="password" value="">
-
-        <label for="password">Slaptažodis (dar kartą):</label>
-        <input type="password" name="password_repeat" value="">
-
-        <input type="submit" value="Submit" />
-        </form>
-
-        <form action="?c=user&m=login" method="post" accept-charset="utf-8">
-          <input type="hidden" name="csrf_test_name" value="<?php echo $this->security->get_csrf_hash(); ?>" />
-        <label for="email">El. paštas:</label>
-        <input type="email" name="email" value="">
-
-        <label for="password">Slaptažodis:</label>
-        <input type="password" name="password" value="">
-
-        <input type="submit" value="Submit" />
-          </form>
+        <?php $this->load->view('forms/auth'); ?>
       </div>
     <?php else: ?>
         <div class="btn btn--medium btn--silver" id="authorized">
-          <b><?php echo $company->name; ?></b>
+          <?php echo $company->name; ?>
           <a href="index.php?c=user&m=logout"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTguMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgdmlld0JveD0iMCAwIDMzMCAzMzAiIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDMzMCAzMzA7IiB4bWw6c3BhY2U9InByZXNlcnZlIiB3aWR0aD0iMTZweCIgaGVpZ2h0PSIxNnB4Ij4KPGc+Cgk8cGF0aCBkPSJNMjQ1LjYwOCw4NC4zOTJjLTUuODU2LTUuODU3LTE1LjM1NS01Ljg1OC0yMS4yMTMtMC4wMDFjLTUuODU3LDUuODU4LTUuODU4LDE1LjM1NSwwLDIxLjIxM0wyNjguNzg5LDE1MEg4NS4wMDIgICBjLTguMjg0LDAtMTUsNi43MTYtMTUsMTVzNi43MTYsMTUsMTUsMTVoMTgzLjc4NWwtNDQuMzkyLDQ0LjM5MmMtNS44NTgsNS44NTgtNS44NTgsMTUuMzU1LDAsMjEuMjEzICAgYzIuOTI5LDIuOTI5LDYuNzY4LDQuMzkzLDEwLjYwNyw0LjM5M2MzLjgzOSwwLDcuNjc4LTEuNDY0LDEwLjYwNi00LjM5M2w2OS45OTgtNjkuOTk4YzUuODU4LTUuODU3LDUuODU4LTE1LjM1NSwwLTIxLjIxMyAgIEwyNDUuNjA4LDg0LjM5MnoiIGZpbGw9IiMwMDAwMDAiLz4KCTxwYXRoIGQ9Ik0xNTUsMzMwYzguMjg0LDAsMTUtNi43MTYsMTUtMTVzLTYuNzE2LTE1LTE1LTE1SDQwVjMwaDExNWM4LjI4NCwwLDE1LTYuNzE2LDE1LTE1cy02LjcxNi0xNS0xNS0xNUgyNSAgIGMtOC4yODQsMC0xNSw2LjcxNi0xNSwxNXYzMDBjMCw4LjI4NCw2LjcxNiwxNSwxNSwxNUgxNTV6IiBmaWxsPSIjMDAwMDAwIi8+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==" width="14" style="opacity: 0.5;vertical-align: middle;
 margin-bottom: 2px;
-margin-right: 3px;"/></a>
+margin-right: 3px; margin-left:10px;"/></a>
         </div>
-
+      <div class="edit-company">
+        <?php $this->load->view('forms/edit_company'); ?>
+      </div>
     <?php endif; ?>
-    <a class="btn btn--medium btn--orange"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjE2cHgiIGhlaWdodD0iMTZweCIgdmlld0JveD0iMCAwIDM1NyAzNTciIHN0eWxlPSJlbmFibGUtYmFja2dyb3VuZDpuZXcgMCAwIDM1NyAzNTc7IiB4bWw6c3BhY2U9InByZXNlcnZlIj4KPGc+Cgk8ZyBpZD0iYWRkIj4KCQk8cGF0aCBkPSJNMzU3LDIwNEgyMDR2MTUzaC01MVYyMDRIMHYtNTFoMTUzVjBoNTF2MTUzaDE1M1YyMDR6IiBmaWxsPSIjRkZGRkZGIi8+Cgk8L2c+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPGc+CjwvZz4KPC9zdmc+Cg==" width="14" style="vertical-align: middle;
-margin-bottom: 2px;
-margin-right: 3px;" /> <b>Įdėti darbo skelbimą</b></a>
   </div>
 </header>
 <div id="show_list" style="position: absolute;
@@ -93,7 +73,7 @@ padding: 3px;
 font-size: 0.75em;
 margin: 10px;
 cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
-<div class="window">
+<div class="window" id="jobs">
     <span style="margin-left:10px;color:silver;">></span><input id="pac-input" class="controls" type="text" placeholder="Mano gatvė, miestas"><button onclick="enableSetHomePosition()" class="set_home_position"><svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" class="set_home_position_icon" x="0px" y="0px" width="20px" height="20px" viewBox="0 0 510 510" style="enable-background:new 0 0 510 510;" xml:space="preserve"><path d="M255,0C155.55,0,76.5,79.05,76.5,178.5C76.5,311.1,255,510,255,510s178.5-198.9,178.5-331.5C433.5,79.05,354.45,0,255,0z     M255,242.25c-35.7,0-63.75-28.05-63.75-63.75s28.05-63.75,63.75-63.75s63.75,28.05,63.75,63.75S290.7,242.25,255,242.25z"/></svg></button>
     <div class="window__sort">
       <div class="sort-row">
@@ -256,14 +236,100 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
       </div>
     </div>
   </div>
+
+  <div class="window" id="add_job" style="display: none;">
+    <?php $this->load->view('forms/add_job'); ?>
+  </div>
+
+  <div class="window" id="edit_job" style="display: none;">
+
+  </div>
     <div id="color-scale" style="display:none"><img src="static/images/color-scale.png"></div>
 	<div id="map"></div>
 
-    
+  <script>
+    height = $(window).height() - $(".header").outerHeight();
+    $("#map").css("height",height);
+    var addEvent = function(object, type, callback) {
+      if (object == null || typeof(object) == 'undefined') return;
+      if (object.addEventListener) {
+        object.addEventListener(type, callback, false);
+      } else if (object.attachEvent) {
+        object.attachEvent("on" + type, callback);
+      } else {
+        object["on"+type] = callback;
+      }
+    };
+
+    addEvent(window, "resize", function(event) {
+      height = $(window).height() - $(".header").outerHeight();
+      $("#map").css("height",height);
+    });
+
+    $(".authorize").hide();
+
+    $("#not-authorized").on("click",function(){
+      $(".authorize").toggle();
+    });
+
+    $(".edit-company").hide();
+
+    $("#authorized").on("click",function(){
+      $(".edit-company").toggle();
+    });
+  </script>
 	<script src="<?php echo base_url(); ?>static/js/markerclusterer.js" async></script>
 
 	<script src="<?php echo base_url(); ?>static/js/main.js?v=1"></script>
 	<script src="//maps.googleapis.com/maps/api/js?key=AIzaSyAJhXhTIxa5iUsy3FQA5bERrbbxdEZ7Cls&libraries=places&language=lt&region=LT&callback=getMarkers"></script>
-    <!--<script src="static/js/markerwithlabel.js"></script>-->
+  <script>
+    $("#jobs-switcher-my").on("click", function(){
+      $(this).hide();
+      $("#jobs-switcher-all").show();
+      switchJobs(<?php echo $company->id; ?>);
+    });
+
+    $("#jobs-switcher-all").on("click", function(){
+      $(this).hide();
+      $("#jobs-switcher-my").show();
+      switchJobs(0);
+    });
+
+    $("#create-job").on("click", function(){
+      $("#jobs").hide();
+      $("#add_job").show();
+    });
+
+    $("#edit-job").on("click", function(){
+      var id = $(this).data("id");
+      $("#edit_job").show();
+      $.ajax({
+        type: "GET",
+        url: CVMaps.paths.h,
+        data: {
+          c: "jobs",
+          m: "get_job_by_id",
+          id: id
+        },
+        success: function(val){
+          console.log(val);
+        }
+      });
+    });
+
+    $("#delete-job").on("click", function(){
+      var id = $(this).data("id");
+
+    });
+
+    function switchJobs(user_id){
+      param.jobs = 0;
+      j = [];
+      param.user_id = user_id ;
+      clearMarkers();
+      initParam();
+      getMarkers();
+    }
+  </script>
 </body>
 </html>
