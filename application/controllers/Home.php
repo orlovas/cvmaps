@@ -41,6 +41,17 @@ class Home extends CI_Controller {
         $this->load->view('index',$data);
 	}
 
+    public function get_job_by_id(){
+        $id = $this->input->get("id");
+        $data = $this->jobs->get_job_by_id($id);
+        if(!$data){
+            echo "job not found";
+            return false;
+        }
+        $this->output->set_content_type('application/json');
+        $this->output->set_output(json_encode($data));
+    }
+
     private function getUserId(){
         $id = 0;
         if(isset($_COOKIE["token"]) && !empty($_COOKIE["token"])){

@@ -10,6 +10,4 @@ Todo
 ====
 1. Edit post, delete post from list
 2. Notification system
-3. Error control
-3.1. when bad credentials in registration, login, job creating, job editing, company editing
-3.2. when something gone wrong during upload or receiving from DB
+3. Error control - when bad credentials in registration, login, job creating, job editing, company editing; - when something gone wrong during upload or receiving from DB

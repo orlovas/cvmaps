@@ -215,7 +215,7 @@ class Backoffice extends CI_Controller
             $work_time_id = $this->input->post("work_time_id");
             $salary_from = $this->input->post("salary_from");
             $salary_to = $this->input->post("salary_to");
-            $company_id = 1;
+            $company_id = $this->company_id;
             $user_id = $this->user_id;
             $url = $this->input->post('url');
             $url_id = ($this->compareUrls($url,$data->url_id) ? $data->url_id : $this->jobs->add_url($url));
@@ -236,11 +236,7 @@ class Backoffice extends CI_Controller
                 $url_id,
                 $marker_id
             )){
-                $id = $this->input->get("id");
-                $data = $this->jobs->get_job_by_id($id);
-                $data->categories = $this->queries->get_categories();
-                $data->cities = $this->queries->get_cities();
-                $this->load->view('editjob', $data);
+                redirect();
 
             } else {
                 var_dump($this->db->error());
@@ -254,7 +250,7 @@ class Backoffice extends CI_Controller
         if(!$this->users->confirm_user(["type"=>"jobs","id"=>$id],$this->user_id)) return false;
 
         if($this->jobs->delete_job($id)){
-            $this->index();
+            redirect();
         } else {
             echo "error";
         }

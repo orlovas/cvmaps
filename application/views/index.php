@@ -242,7 +242,62 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
   </div>
 
   <div class="window" id="edit_job" style="display: none;">
+    <?php
 
+    echo validation_errors();
+
+    echo form_open('?c=backoffice&m=edit_job&id=');
+
+    ?>
+
+    <label for="title">Pareiga <small class="text-danger">(Privalomas laukas)</small></label><br />
+    <input type="text" name="title" id="edit-title" value="" required><br />
+
+    <?php echo '
+<div class="form-group">
+<label for="category_id">Darbo sritis <small class="text-danger">(Privalomas laukas)</small></label>
+<select class="form-control" name="category_id" id="edit-category_id" required>';
+    foreach($categories as $category){
+
+      echo '<option value="'.$category['category_id'].'">'.$category['category_name'].'</option>';
+    }
+    echo '</select>
+</div>';
+    ?>
+
+    <?php echo '
+<div class="form-group">
+<label for="city_id">Miestas arba savivaldybė <small class="text-danger">(Privalomas laukas)</small></label>
+<select class="form-control" name="city_id" id="edit-city_id" required>';
+    foreach($cities as $city){
+      echo '<option value="'.$city['city_id'].'">'.$city['city_name'].'</option>';
+    }
+    echo '</select>
+</div>';
+    ?>
+
+    <label for="address">Adresas <small class="text-danger">(Privalomas laukas)</small></label><br />
+    <input type="text" name="address" id="edit-address" value="" required><br />
+
+    <label for="salary_from">Atlyginimas <small>(Atskaičius mokesčius)</small></label><br />
+    Nuo <input class="form-control salary" type="number" name="salary_from" id="edit-salary_from" ">
+    Iki <input class="form-control salary" type="number" name="salary_to" id="edit-salary_to"><br />
+
+
+    <label for="work_time_id">Darbo laikas</label>
+    <select name="work_time_id" id="edit-work_time_id" required>
+      <option value="1">Pilna darbo diena</option>
+      <option value="2" >Nepilna darbo diena</option>
+    </select>
+
+    <label for="url">URL <small class="text-danger">(Privalomas laukas)</small></label><br />
+    <input type="url" name="url" id="edit-url" value="" required><br />
+
+    <input type="submit" value="Submit" />
+    <?php
+
+    echo form_close();
+    ?>
   </div>
     <div id="color-scale" style="display:none"><img src="static/images/color-scale.png"></div>
 	<div id="map"></div>
@@ -298,23 +353,6 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
     $("#create-job").on("click", function(){
       $("#jobs").hide();
       $("#add_job").show();
-    });
-
-    $("#edit-job").on("click", function(){
-      var id = $(this).data("id");
-      $("#edit_job").show();
-      $.ajax({
-        type: "GET",
-        url: CVMaps.paths.h,
-        data: {
-          c: "jobs",
-          m: "get_job_by_id",
-          id: id
-        },
-        success: function(val){
-          console.log(val);
-        }
-      });
     });
 
     $("#delete-job").on("click", function(){

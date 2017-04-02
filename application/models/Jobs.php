@@ -154,7 +154,7 @@ class Jobs extends CI_Model
     }
 
     public function get_job_by_id($id){
-        $this->db->select("jobs.id, user_id, title, address, category_id, work_time_id, salary_from, salary_to, edu_id, url_id, marker_id, urls.url AS url, markers.lat AS lat, markers.lng AS lng");
+        $this->db->select("jobs.id, user_id, title, address, category_id, city_id, work_time_id, salary_from, salary_to, edu_id, url_id, marker_id, urls.url AS url, markers.lat AS lat, markers.lng AS lng");
         $this->db->from('jobs');
         $this->db->join('urls', 'urls.id = jobs.url_id');
         $this->db->join('markers', 'markers.id = jobs.marker_id');
