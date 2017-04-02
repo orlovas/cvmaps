@@ -19,10 +19,6 @@ var _p = 1,
 var c = []; // coordinates
 var j = []; // jobs
 var tp = 0; // total pages
-var param = {
-    jobs: 0,
-    user_id: 0
-};
 var dp = []; // downloaded pages
 var home_marker = [];
 var home_radius = [];
@@ -59,7 +55,7 @@ function initParam(confirm){
             edu_id: _edu_id,
             salary: _salary,
             work_time_id: _work_time,
-            user_id: param.user_id
+            user_id: (param.show === "my" ? param.user_id : 0)
         },
         success: function(p){
             param.jobs = p.jobs;
@@ -96,7 +92,11 @@ function initList() {
     if(typeof j !== "undefined") {
         for (var i = start; i < end; i++) {
             var salary = salaryToString(j,i);
-            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a>' + (param.user_id !== 0 ? '<span id="edit-job" onclick="edit_job(this)" data-id="'+j[i].id+'">Redaguoti</span> <span id="delete-job" onclick="delete_job(this)" data-id="'+j[i].id+'">Pašalinti</span>' : '') + '</li>');
+            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a>');
+            if(isJobMine(j[i].id)){
+                list.append('<span id="edit-job" onclick="edit_job(this)" data-id="'+j[i].id+'">Redaguoti</span> <span id="delete-job" onclick="delete_job(this)" data-id="'+j[i].id+'">Pašalinti</span>');
+            }
+            list.append('</li>');
         }
     }
     $("#pg-current").html(_p);
@@ -137,7 +137,6 @@ function initList2() {
         }
     }
     $("#pg-current").html(_p);
-    loading(10);
 }
 
 function initMap() {
@@ -195,6 +194,31 @@ function initSearchBox(){
     });
 }
 
+function initAddressBox2(){
+    var input = document.getElementById('edit-address');
+    var options = {componentRestrictions: {country: 'lt'}};
+    var searchBox = new google.maps.places.SearchBox(input,options);
+    map.addListener('bounds_changed', function() {
+        searchBox.setBounds(map.getBounds());
+    });
+
+    searchBox.addListener('places_changed', function() {
+        var places = searchBox.getPlaces();
+
+        if (places.length == 0) {
+            return;
+        }
+
+        places.forEach(function(place) {
+            if (!place.geometry) {
+                console.log("Returned place contains no geometry");
+                return;
+            }
+
+        });
+    });
+}
+
 /*
 #    Getters  #
  */
@@ -211,7 +235,7 @@ function getMarkers(){
             edu_id: _edu_id,
             salary: _salary,
             work_time_id: _work_time,
-            user_id: param.user_id
+            user_id: (param.show === "my" ? param.user_id : 0)
         },
         success: function(response){
             $.each( response, function( key, val ) {
@@ -246,7 +270,7 @@ function getJobs(confirm){
             edu_id: _edu_id,
             salary: _salary,
             work_time_id: _work_time,
-            user_id: param.user_id
+            user_id: (param.show === "my" ? param.user_id : 0)
         },
         success: function(response){
             $.each( response, function( key, val ) {
@@ -581,10 +605,8 @@ function getDuration(origin){
     } else {
         console.log("No work here");
         restoreJobRanking();
-        loading(100);
         return;
     }
-    loading(10);
     $.ajax({
       type: 'GET',
       url: 'http://matrix.mapzen.com/one_to_many',
@@ -609,7 +631,6 @@ function getDuration(origin){
                   j[id].time = round((val.time/60),1);
               }
             });
-            loading(40);
             jobRanking();
 
       },
@@ -629,7 +650,6 @@ function findNearest(lat,lng){
         }
 
     }
-    loading(10);
     getDuration([lat,lng]);
 }
 
@@ -805,7 +825,7 @@ function jobRanking(){
         }
 
     }
-    loading(30);
+
     scaleDownValues();
     param.jobs = 0;
     for(var i=0; i< j.length; i++){
@@ -813,7 +833,7 @@ function jobRanking(){
     }
     initList2(); // temporary
     $("#color-scale").show();
-    loading(10);
+
 
 }
 
@@ -879,7 +899,7 @@ function scaleDownValues(){
 
         //markers[mid].set('labelContent', j[job_arr_id].salary_from + "-" + j[job_arr_id].salary_to +" €");
 	}
-    loading(20);
+
 }
 
 /*
@@ -1005,6 +1025,112 @@ $("#show_list").on("click", function(){
     $(".window").slideToggle();
     $("#show_list").toggle();
 });
+
+function edit_job(el){
+    var id = $(el).data("id");
+    $("#edit_job").show();
+
+    $.ajax({
+        type: "GET",
+        url: CVMaps.paths.h,
+        data: {
+            c: "home",
+            m: "get_job_by_id",
+            id: id
+        },
+        success: function(val){
+            setTimeout(function() { initAddressBox2(); }, 2000);
+
+            var form = $("#edit_job > form:nth-child(1)");
+            form.attr("action", form.attr("action") + id.toString());
+            $("#edit-title").val(val.title);
+            $("#edit-category_id").val(parseInt(val.category_id));
+            $("#edit-city_id").val(parseInt(val.city_id));
+            $("#edit-address").val(val.address);
+            $("#edit-salary_from").val(parseFloat(val.salary_from));
+            $("#edit-salary_to").val(parseFloat(val.salary_to));
+            $("#edit-work_time_id").val(parseInt(val.work_time_id));
+            $("#edit-edu_id").val(parseInt(val.edu_id));
+            $("#edit-url").val(val.url);
+        }
+    });
+}
+
+function delete_job(el){
+    var id = $(el).data("id");
+
+    $.ajax({
+        type: "GET",
+        url: CVMaps.paths.h,
+        data: {
+            c: "backoffice",
+            m: "delete_job",
+            id: id
+        }
+    });
+}
+
+var window_height = $(window).height() - $(".header").outerHeight();
+$("#map").css("height",window_height);
+var addEvent = function(object, type, callback) {
+    if (object == null || typeof(object) == 'undefined') return;
+    if (object.addEventListener) {
+        object.addEventListener(type, callback, false);
+    } else if (object.attachEvent) {
+        object.attachEvent("on" + type, callback);
+    } else {
+        object["on"+type] = callback;
+    }
+};
+
+addEvent(window, "resize", function(event) {
+    window_height = $(window).height() - $(".header").outerHeight();
+    $("#map").css("height",window_height);
+});
+
+$(".authorize").hide();
+
+$("#not-authorized").on("click",function(){
+    $(".authorize").toggle();
+});
+
+$(".edit-company").hide();
+
+$("#authorized").on("click",function(){
+    $(".edit-company").toggle();
+});
+
+$("#jobs-switcher-my").on("click", function(){
+    $(this).hide();
+    $("#jobs-switcher-all").show();
+    param.show = "my";
+    switchJobs();
+});
+
+$("#jobs-switcher-all").on("click", function(){
+    $(this).hide();
+    $("#jobs-switcher-my").show();
+    param.show = "all";
+    switchJobs();
+});
+
+$("#create-job").on("click", function(){
+    $("#jobs").hide();
+    $("#add_job").show();
+});
+
+$("#delete-job").on("click", function(){
+    var id = $(this).data("id");
+
+});
+
+function switchJobs(){
+    param.jobs = 0;
+    j = [];
+    clearMarkers();
+    initParam();
+    getMarkers();
+}
 
 /*
 ###    Miscellaneous functions  ###
@@ -1137,86 +1263,13 @@ function salaryToString(response,key){
     return salary += ' €';
 }
 
+function isJobMine(jid){
 
-var loadbar = $(".loading");
-var loadval = 0;
-
-function loading(val){
-    /*loadbar.show();
-    loadval += val;
-    var width = loadval + "%";
-    loadbar.css("width",width);
-    if(loadval >= 100){
-        loadbar.fadeOut(1000, function(){
-            loadval = 0;
-        });
-    }*/
-}
-
-function edit_job(el){
-    var id = $(el).data("id");
-    $("#edit_job").show();
-
-    $.ajax({
-     type: "GET",
-     url: CVMaps.paths.h,
-     data: {
-     c: "home",
-     m: "get_job_by_id",
-     id: id
-     },
-     success: function(val){
-         setTimeout(function() { initAddressBox(); }, 2000);
-
-         var form = $("#edit_job > form:nth-child(1)");
-         form.attr("action", form.attr("action") + id.toString());
-         $("#edit-title").val(val.title);
-         $("#edit-category_id").val(parseInt(val.category_id));
-         $("#edit-city_id").val(parseInt(val.city_id));
-         $("#edit-address").val(val.address);
-         $("#edit-salary_from").val(parseFloat(val.salary_from));
-         $("#edit-salary_to").val(parseFloat(val.salary_to));
-         $("#edit-work_time_id").val(parseInt(val.work_time_id));
-         $("#edit-url").val(val.url);
-     }
-     });
-}
-
-function delete_job(el){
-    var id = $(el).data("id");
-
-    $.ajax({
-        type: "GET",
-        url: CVMaps.paths.h,
-        data: {
-            c: "backoffice",
-            m: "delete_job",
-            id: id
-        }
-    });
-}
-
-function initAddressBox(){
-    var input = document.getElementById('edit-address');
-    var options = {componentRestrictions: {country: 'lt'}};
-    var searchBox = new google.maps.places.SearchBox(input,options);
-    map.addListener('bounds_changed', function() {
-        searchBox.setBounds(map.getBounds());
-    });
-
-    searchBox.addListener('places_changed', function() {
-        var places = searchBox.getPlaces();
-
-        if (places.length == 0) {
-            return;
-        }
-
-        places.forEach(function(place) {
-            if (!place.geometry) {
-                console.log("Returned place contains no geometry");
-                return;
+    if(param.user_jobs_ids){
+        for(var i= 0; i<param.user_jobs_ids.length; i++){
+            if(param.user_jobs_ids[i].id === jid){
+                return true;
             }
-
-        });
-    });
+        }
+    }
 }

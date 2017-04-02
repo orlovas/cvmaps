@@ -982,6 +982,6 @@ input[type=range]:focus::-ms-fill-upper {
     vertical-align: middle;
 }
 
-#add_job{
+#add_job,#edit_job{
     padding: 10px;
 }

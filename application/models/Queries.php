@@ -96,7 +96,18 @@ class Queries extends CI_Model {
         $this->db->where_in("jobs.id",$ids);
 
         $query = $this->db->get();
-        return $query->result_array();
+        $result = [];
+        foreach ($query->array() as $row)
+        {
+            array_push($result,$row->id);
+        }
+        return $result;
+    }
+
+    public function get_user_jobs_ids($user_id)
+    {
+        $query = $this->db->select('id')->from('jobs')->where('user_id',$user_id)->get();
+        return $query ? $query->result_array() : false;
     }
 
     public function get_markers($category_id,$city_id,$edu_id,$salary,$work_time_id,$user_id=0)

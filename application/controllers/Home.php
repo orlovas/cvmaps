@@ -36,6 +36,8 @@ class Home extends CI_Controller {
             $data['categories'] = $this->queries->get_categories();
             $data['cities'] = $this->queries->get_cities();
             $data['educations'] = $this->queries->get_educations();
+            $data['user_id'] = $this->user_id;
+            $data['user_jobs_ids'] = json_encode($this->queries->get_user_jobs_ids($this->user_id));
         }
 
         $this->load->view('index',$data);

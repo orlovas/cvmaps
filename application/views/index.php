@@ -5,7 +5,7 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Darbo skelbimai žemėlapyje — CVMaps.lt</title>
+  <title>Darbo skelbimai žemėlapyje — Workmaps</title>
 
   <meta name="description" content="">
   
@@ -20,6 +20,16 @@
         src="https://code.jquery.com/jquery-1.12.4.min.js"
         integrity="sha256-ZosEbRLbNQzLpnKIkEdrPv7lOy9C27hHQ+Xp8a4MxAQ="
         crossorigin="anonymous"></script>
+
+  <script>
+    var param = {
+      jobs: 0,
+      user_id: <?php echo (isset($user_id) ? $user_id : 0); ?>,
+      company_id: <?php echo (isset($company->id) ? $company->id : 0); ?>,
+      user_jobs_ids: <?php echo isset($user_jobs_ids) ? $user_jobs_ids : 0; ?>,
+      show: "all"
+    };
+  </script>
   <!--[if IE]>
     <style>.sort-row{padding-bottom:0!important}</style>
     <script src="<?php echo base_url(); ?>static/js/main.ie.js"></script>
@@ -242,132 +252,13 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
   </div>
 
   <div class="window" id="edit_job" style="display: none;">
-    <?php
-
-    echo validation_errors();
-
-    echo form_open('?c=backoffice&m=edit_job&id=');
-
-    ?>
-
-    <label for="title">Pareiga <small class="text-danger">(Privalomas laukas)</small></label><br />
-    <input type="text" name="title" id="edit-title" value="" required><br />
-
-    <?php echo '
-<div class="form-group">
-<label for="category_id">Darbo sritis <small class="text-danger">(Privalomas laukas)</small></label>
-<select class="form-control" name="category_id" id="edit-category_id" required>';
-    foreach($categories as $category){
-
-      echo '<option value="'.$category['category_id'].'">'.$category['category_name'].'</option>';
-    }
-    echo '</select>
-</div>';
-    ?>
-
-    <?php echo '
-<div class="form-group">
-<label for="city_id">Miestas arba savivaldybė <small class="text-danger">(Privalomas laukas)</small></label>
-<select class="form-control" name="city_id" id="edit-city_id" required>';
-    foreach($cities as $city){
-      echo '<option value="'.$city['city_id'].'">'.$city['city_name'].'</option>';
-    }
-    echo '</select>
-</div>';
-    ?>
-
-    <label for="address">Adresas <small class="text-danger">(Privalomas laukas)</small></label><br />
-    <input type="text" name="address" id="edit-address" value="" required><br />
-
-    <label for="salary_from">Atlyginimas <small>(Atskaičius mokesčius)</small></label><br />
-    Nuo <input class="form-control salary" type="number" name="salary_from" id="edit-salary_from" ">
-    Iki <input class="form-control salary" type="number" name="salary_to" id="edit-salary_to"><br />
-
-
-    <label for="work_time_id">Darbo laikas</label>
-    <select name="work_time_id" id="edit-work_time_id" required>
-      <option value="1">Pilna darbo diena</option>
-      <option value="2" >Nepilna darbo diena</option>
-    </select>
-
-    <label for="url">URL <small class="text-danger">(Privalomas laukas)</small></label><br />
-    <input type="url" name="url" id="edit-url" value="" required><br />
-
-    <input type="submit" value="Submit" />
-    <?php
-
-    echo form_close();
-    ?>
+    <?php $this->load->view('forms/edit_job'); ?>
   </div>
     <div id="color-scale" style="display:none"><img src="static/images/color-scale.png"></div>
 	<div id="map"></div>
-
-  <script>
-    height = $(window).height() - $(".header").outerHeight();
-    $("#map").css("height",height);
-    var addEvent = function(object, type, callback) {
-      if (object == null || typeof(object) == 'undefined') return;
-      if (object.addEventListener) {
-        object.addEventListener(type, callback, false);
-      } else if (object.attachEvent) {
-        object.attachEvent("on" + type, callback);
-      } else {
-        object["on"+type] = callback;
-      }
-    };
-
-    addEvent(window, "resize", function(event) {
-      height = $(window).height() - $(".header").outerHeight();
-      $("#map").css("height",height);
-    });
-
-    $(".authorize").hide();
-
-    $("#not-authorized").on("click",function(){
-      $(".authorize").toggle();
-    });
-
-    $(".edit-company").hide();
-
-    $("#authorized").on("click",function(){
-      $(".edit-company").toggle();
-    });
-  </script>
 	<script src="<?php echo base_url(); ?>static/js/markerclusterer.js" async></script>
 
 	<script src="<?php echo base_url(); ?>static/js/main.js?v=1"></script>
 	<script src="//maps.googleapis.com/maps/api/js?key=AIzaSyAJhXhTIxa5iUsy3FQA5bERrbbxdEZ7Cls&libraries=places&language=lt&region=LT&callback=getMarkers"></script>
-  <script>
-    $("#jobs-switcher-my").on("click", function(){
-      $(this).hide();
-      $("#jobs-switcher-all").show();
-      switchJobs(<?php echo $company->id; ?>);
-    });
-
-    $("#jobs-switcher-all").on("click", function(){
-      $(this).hide();
-      $("#jobs-switcher-my").show();
-      switchJobs(0);
-    });
-
-    $("#create-job").on("click", function(){
-      $("#jobs").hide();
-      $("#add_job").show();
-    });
-
-    $("#delete-job").on("click", function(){
-      var id = $(this).data("id");
-
-    });
-
-    function switchJobs(user_id){
-      param.jobs = 0;
-      j = [];
-      param.user_id = user_id ;
-      clearMarkers();
-      initParam();
-      getMarkers();
-    }
-  </script>
 </body>
 </html>

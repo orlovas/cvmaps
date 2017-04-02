@@ -76,8 +76,8 @@ echo form_open('?c=backoffice&m=add_job');
         <small>* - privalomas laukas</small>
     </div>
     <div class="form-row">
-    <input type="submit"  value="Paskelbti" class="btn btn--small btn--green" />
-        </div>
+        <input type="submit"  value="Paskelbti" class="btn btn--small btn--green" />
+    </div>
 <?php
 
 echo form_close();
