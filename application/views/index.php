@@ -253,7 +253,8 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
     </div>
   </div>
 
-  <div style="position: absolute; z-index:1000; top: 100px; right:0">
+  <div class="weights">
+    <b>Paieškos kriterijų nustatymas</b>
     <form action="">
       <label for="weight_distance">Atstumas</label>
       <input type="range" id="weight_distance" value="0.50" max="0.99" min="0.01" step="0.01">
@@ -267,6 +268,7 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
       <label for="weight_credit">Ekonominė būklė</label>
       <input type="range" id="weight_credit" value="0.08" max="0.99" min="0.01" step="0.01">
     </form>
+    <div id="weights_reset" class="btn btn--small btn--silver" style="width: 100%;padding: 5px;margin-top: 10px;">Atšaukti pakeitimus</div>
   </div>
 
   <div class="window" id="add_job" style="display: none;">

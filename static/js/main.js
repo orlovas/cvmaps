@@ -1278,6 +1278,20 @@ $("#weight_credit").on("change", function(){
     changeWeights("credit",$(this).val());
 });
 
+$("#weights_reset").on("click", function(){
+    param.weights.distance = 0.25;
+    param.weights.salary = 0.50;
+    param.weights.average_salary = 0.18;
+    param.weights.credit = 0.07;
+    $("#weight_distance").val(param.weights.distance);
+    $("#weight_average_salary").val(param.weights.average_salary);
+    $("#weight_credit").val(param.weights.credit);
+    $("#weight_salary").val(param.weights.salary);
+    if(home_radius.length > 0){
+        jobRanking();
+    }
+});
+
 function changeWeights(type,val){
     var diff;
     switch(type) {
@@ -1338,7 +1352,7 @@ function recalculateWeights(name,diff){
         param.weights.credit = credit - (diff * (credit / sum));
         $("#weight_credit").val(param.weights.credit);
     }
-    
+
     if(home_radius.length > 0){
         jobRanking();
     }
