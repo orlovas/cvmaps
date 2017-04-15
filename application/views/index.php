@@ -253,6 +253,22 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
     </div>
   </div>
 
+  <div style="position: absolute; z-index:1000; top: 100px; right:0">
+    <form action="">
+      <label for="weight_distance">Atstumas</label>
+      <input type="range" id="weight_distance" value="0.50" max="0.99" min="0.01" step="0.01">
+
+      <label for="weight_salary">Atlyginimas</label>
+      <input type="range" id="weight_salary" value="0.25" max="0.99" min="0.01" step="0.01">
+
+      <label for="weight_average_salary">Vid. atlyginimas</label>
+      <input type="range" id="weight_average_salary" value="0.17" max="0.99" min="0.01" step="0.01">
+
+      <label for="weight_credit">Ekonominė būklė</label>
+      <input type="range" id="weight_credit" value="0.08" max="0.99" min="0.01" step="0.01">
+    </form>
+  </div>
+
   <div class="window" id="add_job" style="display: none;">
     <?php $this->load->view('forms/add_job'); ?>
   </div>

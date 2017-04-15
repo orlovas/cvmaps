@@ -635,7 +635,7 @@ function getDuration(origin){
 
       },
         error: function() {
-            alert("Įvyko klaida. Galimos priežastys: 1) viršytas leistinų skelbimų skaičius. Pabandykite sumažinti laiką iki darbo (atstumą); 2) viršytas leistinų paieškų per sekundę. Pabandykite dar kartą po 10-15 sek.");
+            alert("Įvyko klaida. Galimos priežastys: 1) viršytas leistinų skelbimų skaičius. Pabandykite sumažinti laiką iki darbo (atstumą); 2) viršytas leistinų paieškų per sekundę. Pabandykite dar kartą po 1 min.");
         }
     });
 }
@@ -709,10 +709,6 @@ function restoreJobRanking(){
     children = [];
 }
 
-function jobRankingDelayed(){
-    setTimeout(function() { jobRanking(); }, 1000);
-}
-
 function jobRanking(){
     // Return all markers', c[], j[] and other parameters to default
 	restoreJobRanking();
@@ -747,13 +743,6 @@ function jobRanking(){
                 });
 	    return;
     }
-
-    /*var weight = {
-        salary: 0.50,
-        distance: 0.25,
-        average_salary: 0.18,
-        credit: 0.07
-    };*/
 
     var dl = data.length;
 
@@ -897,7 +886,6 @@ function scaleDownValues(){
             );
         }
 
-        //markers[mid].set('labelContent', j[job_arr_id].salary_from + "-" + j[job_arr_id].salary_to +" €");
 	}
 
 }
@@ -1271,5 +1259,87 @@ function isJobMine(jid){
                 return true;
             }
         }
+    }
+}
+
+$("#weight_distance").on("change", function(){
+   changeWeights("distance",$(this).val());
+});
+
+$("#weight_salary").on("change", function(){
+    changeWeights("salary",$(this).val());
+});
+
+$("#weight_average_salary").on("change", function(){
+    changeWeights("average_salary",$(this).val());
+});
+
+$("#weight_credit").on("change", function(){
+    changeWeights("credit",$(this).val());
+});
+
+function changeWeights(type,val){
+    var diff;
+    switch(type) {
+        case "distance":
+            diff = parseFloat(val) - param.weights.distance;
+            param.weights.distance = parseFloat(val);
+            break;
+
+        case "salary":
+            diff = parseFloat(val) - param.weights.salary;
+            param.weights.salary = parseFloat(val);
+            break;
+
+        case "average_salary":
+            diff = parseFloat(val) - param.weights.average_salary;
+            param.weights.average_salary = parseFloat(val);
+            break;
+
+        case "credit":
+            diff = parseFloat(val) - param.weights.credit;
+            param.weights.credit = parseFloat(val);
+            break;
+        default:
+            break;
+    }
+
+    recalculateWeights(type,diff);
+}
+
+function recalculateWeights(name,diff){
+    var sum = 0,
+        salary = param.weights.salary,
+        average_salary = param.weights.average_salary,
+        credit = param.weights.credit,
+        distance = param.weights.distance;
+
+    sum += (name != "distance" ? distance : 0);
+    sum += (name != "salary" ? salary : 0);
+    sum += (name != "average_salary" ? average_salary : 0);
+    sum += (name != "credit" ? credit : 0);
+
+    if(name !== "distance"){
+        param.weights.distance = distance - (diff * (distance / sum));
+        $("#weight_distance").val(param.weights.distance);
+    }
+
+    if(name !== "salary"){
+        param.weights.salary = salary - (diff * (salary / sum));
+        $("#weight_salary").val(param.weights.salary);
+    }
+
+    if(name !== "average_salary"){
+        param.weights.average_salary = average_salary - (diff * (average_salary / sum));
+        $("#weight_average_salary").val(param.weights.average_salary);
+    }
+
+    if(name !== "credit"){
+        param.weights.credit = credit - (diff * (credit / sum));
+        $("#weight_credit").val(param.weights.credit);
+    }
+    
+    if(home_radius.length > 0){
+        jobRanking();
     }
 }
