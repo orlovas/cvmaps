@@ -27,7 +27,13 @@
       user_id: <?php echo (isset($user_id) ? $user_id : 0); ?>,
       company_id: <?php echo (isset($company->id) ? $company->id : 0); ?>,
       user_jobs_ids: <?php echo isset($user_jobs_ids) ? $user_jobs_ids : 0; ?>,
-      show: "all"
+      show: "all",
+      weights: {
+        salary: 0.50,
+        distance: 0.25,
+        average_salary: 0.18,
+        credit: 0.07
+      }
     };
   </script>
   <!--[if IE]>

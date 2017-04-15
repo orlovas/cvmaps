@@ -748,12 +748,12 @@ function jobRanking(){
 	    return;
     }
 
-    var weight = {
+    /*var weight = {
         salary: 0.50,
         distance: 0.25,
         average_salary: 0.18,
         credit: 0.07
-    };
+    };*/
 
     var dl = data.length;
 
@@ -806,10 +806,10 @@ function jobRanking(){
 
     for(var i=0; i<dl; i++){
         result =
-            weight.salary * salary[i]
-            + weight.distance * distance[i]
-            + weight.average_salary * average_salary[i]
-            + weight.credit * credit[i];
+            param.weights.salary * salary[i]
+            + param.weights.distance * distance[i]
+            + param.weights.average_salary * average_salary[i]
+            + param.weights.credit * credit[i];
 
         data[i].points = round(result,4);
     }

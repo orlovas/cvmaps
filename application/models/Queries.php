@@ -80,28 +80,8 @@ class Queries extends CI_Model {
 
     public function get_jobs_by_ids($ids,$category_id = 0,$city_id = 0)
     {
-        $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo, jobs.url_id AS u');
-        $this->db->from('jobs');
-        $this->db->join('companies','companies.id = jobs.company_id');
-
-        if($category_id != 0){
-            $this->db->where('jobs.category_id',$category_id);
-        }
-
-        if($city_id != 0){
-            $this->db->where('jobs.city_id',$city_id);
-        }
-
-
-        $this->db->where_in("jobs.id",$ids);
-
-        $query = $this->db->get();
-        $result = [];
-        foreach ($query->array() as $row)
-        {
-            array_push($result,$row->id);
-        }
-        return $result;
+        $query = $this->db->select('jobs.id,IF(company_hidden > 0,0,company_id) AS company_id,title,salary_from,salary_to,companies.name AS company,companies.logo AS logo, jobs.url_id AS u')->from('jobs')->join('companies','companies.id = jobs.company_id')->where_in('jobs.id',$ids)->get();
+        return $query ? $query->result_array() : false;
     }
 
     public function get_user_jobs_ids($user_id)
