@@ -7,8 +7,9 @@
 
   <title>Darbo skelbimai žemėlapyje — Workmaps</title>
 
-  <meta name="description" content="">
-  
+  <link rel="icon" type="image/png" href="../../static/images/favicon-32x32.png" sizes="32x32">
+  <link rel="icon" type="image/png" href="../../static/images/favicon-16x16.png" sizes="16x16">
+
   <style>
   html,body{font:100% 'Open Sans',Arial,sans-serif; color:#2d2d2d; height:100%;}
   </style>
@@ -80,13 +81,9 @@ margin-right: 3px; margin-left:10px;"/></a>
     <?php endif; ?>
   </div>
 </header>
-<div id="show_list" style="position: absolute;
-top: 0px;
+<div id="show_list" class="btn btn--medium btn--green" style="position: absolute;
 z-index: 999;
 display: none;
-background-color: white;
-padding: 3px;
-font-size: 0.75em;
 margin: 10px;
 cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
 <div class="window" id="jobs">
@@ -252,6 +249,8 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
       </div>
     </div>
   </div>
+
+  <div class="hide-window" id="toggle_list">Paslėpti langą <img style="padding: 0 5px;vertical-align: top;" src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjE2cHgiIGhlaWdodD0iMTZweCIgdmlld0JveD0iMCAwIDI5Mi4zNjIgMjkyLjM2MiIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgMjkyLjM2MiAyOTIuMzYyOyIgeG1sOnNwYWNlPSJwcmVzZXJ2ZSI+CjxnPgoJPHBhdGggZD0iTTI4Ni45MzUsMTk3LjI4NkwxNTkuMDI4LDY5LjM3OWMtMy42MTMtMy42MTctNy44OTUtNS40MjQtMTIuODQ3LTUuNDI0cy05LjIzMywxLjgwNy0xMi44NSw1LjQyNEw1LjQyNCwxOTcuMjg2ICAgQzEuODA3LDIwMC45LDAsMjA1LjE4NCwwLDIxMC4xMzJzMS44MDcsOS4yMzMsNS40MjQsMTIuODQ3YzMuNjIxLDMuNjE3LDcuOTAyLDUuNDI4LDEyLjg1LDUuNDI4aDI1NS44MTMgICBjNC45NDksMCw5LjIzMy0xLjgxMSwxMi44NDgtNS40MjhjMy42MTMtMy42MTMsNS40MjctNy44OTgsNS40MjctMTIuODQ3UzI5MC41NDgsMjAwLjksMjg2LjkzNSwxOTcuMjg2eiIgZmlsbD0iIzgwYmFkYSIvPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+CjxnPgo8L2c+Cjwvc3ZnPgo=" /></div>
 
   <div class="weights">
     <b>Paieškos kriterijų nustatymas</b>

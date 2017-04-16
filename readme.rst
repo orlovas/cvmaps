@@ -8,5 +8,4 @@ Experimenting.
 
 Todo
 ====
-1. Notification system
-2. Error control - when bad credentials in registration, login, job creating, job editing, company editing; - when something gone wrong during upload or receiving from DB; Is user legal.
+1. Error control - when bad credentials in registration, login, job creating, job editing, company editing; - when something gone wrong during upload or receiving from DB; Is user legal.

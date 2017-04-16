@@ -1004,3 +1004,83 @@ input[type=range]:focus::-ms-fill-upper {
     border-bottom: 1px solid silver;
     color: #666;
 }
+
+.notification {
+    display: block;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 auto;
+    padding: 10px;
+    text-align: center;
+    font-size: 0.9em;
+    font-weight: bold;
+    z-index: 1001;
+}
+
+.notification--default,
+.notification--loading{
+    background-color: white;
+    color:#0288d1;
+}
+
+.notification--error {
+     background-color: #ffcdd2;
+     color: #b71c1c;
+}
+
+.notification--success {
+    background-color: #DCEDC8;
+    color: #33691E;
+}
+
+.spinner {
+    display: inline-block;
+    width: 22px;
+    height: 22px;
+    margin-right: 5px;
+    background-color: #0288d1;
+    vertical-align: middle;
+    border-radius: 100%;
+    -webkit-animation: sk-scaleout 1.0s infinite ease-in-out;
+    animation: sk-scaleout 1.0s infinite ease-in-out;
+}
+
+@-webkit-keyframes sk-scaleout {
+    0% { -webkit-transform: scale(0) }
+    100% {
+        -webkit-transform: scale(1.0);
+        opacity: 0;
+    }
+}
+
+@keyframes sk-scaleout {
+    0% {
+        -webkit-transform: scale(0);
+        transform: scale(0);
+    } 100% {
+          -webkit-transform: scale(1.0);
+          transform: scale(1.0);
+          opacity: 0;
+      }
+}
+
+.hide-window {
+    position: absolute;
+    background-color: #0075b4;
+    z-index: 10;
+    margin-left: 300px;
+    margin-top: 45px;
+    padding: 5px 5px 5px 20px;
+    border-radius: 10px;
+    color: white;
+    font-size: 0.8em;
+    font-weight: bold;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+.hide-window:hover{
+    margin-left: 400px;
+}
