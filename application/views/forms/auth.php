@@ -22,17 +22,17 @@
         <input type="hidden" name="csrf_test_name" value="<?php echo $this->security->get_csrf_hash(); ?>" />
         <div class="form-row">
             <label for="email">El. paštas <small class="text-danger">*</small></label>
-            <input type="email" name="email">
+            <input type="email" name="email" required>
         </div>
 
         <div class="form-row">
             <label for="password">Slaptažodis <small class="text-danger">*</small></label>
-            <input type="password" name="password">
+            <input type="password" name="password" required>
         </div>
 
         <div class="form-row">
             <label for="password">Slaptažodis (dar kartą) <small class="text-danger">*</small></label>
-            <input type="password" name="password_repeat">
+            <input type="password" name="password_repeat" required>
         </div>
 
         <div class="form-row">

@@ -73,7 +73,7 @@ class Backoffice extends CI_Controller
         $data = $this->companies->get_company($this->company_id);
 
         if ($this->form_validation->run() == FALSE) {
-            $this->load->view('editcompany', $data);
+            redirect("?error=bad_company_edit");
         } else {
             $name = $this->input->post('name');
             $average_salary = $this->input->post('average_salary');
@@ -85,9 +85,9 @@ class Backoffice extends CI_Controller
             }
 
             if($this->companies->edit_company($this->company_id,$name,$average_salary,$high_credit_rating,$logo)){
-                redirect();
+                redirect("?success");
             } else {
-                var_dump($this->db->error());
+                redirect("?error=bad_company_edit");
             }
 
         }
@@ -138,15 +138,12 @@ class Backoffice extends CI_Controller
         $this->form_validation->set_rules('category_id', 'Darbo sritis', 'trim|required');
         $this->form_validation->set_rules('city_id', 'Miestas', 'trim|required');
         $this->form_validation->set_rules('edu_id', 'Issilavinimas', 'trim|required');
-        $this->form_validation->set_rules('salary_from', 'Atlyginimas nuo', 'trim|numeric');
+        $this->form_validation->set_rules('salary_from', 'Atlyginimas nuo', 'trim|numeric|required');
         $this->form_validation->set_rules('salary_to', 'Atlyginimas iki', 'trim|numeric');
         $this->form_validation->set_rules('url', 'URL', 'trim|required|valid_url');
 
         if ($this->form_validation->run() == FALSE) {
-            $data['categories'] = $this->queries->get_categories();
-            $data['cities'] = $this->queries->get_cities();
-            $data['educations'] = $this->queries->get_educations();
-            $this->load->view('addjob',$data);
+            redirect("?error=bad_add_job");
         } else {
 
             $title = $this->input->post('title');
@@ -176,10 +173,10 @@ class Backoffice extends CI_Controller
                 $url_id,
                 $marker_id
             )){
-                redirect();
+                redirect("?success");
 
             } else {
-                var_dump($this->db->error());
+                redirect("?error=bad_add_job");
             }
         }
     }
@@ -206,7 +203,7 @@ class Backoffice extends CI_Controller
         $data->cities = $this->queries->get_cities();
 
         if ($this->form_validation->run() == FALSE) {
-            $this->load->view('editjob', $data);
+            redirect("?error=bad_edit_job");
         } else {
             $title = $this->input->post('title');
             $city_id = $this->input->post('city_id');
@@ -236,10 +233,10 @@ class Backoffice extends CI_Controller
                 $url_id,
                 $marker_id
             )){
-                redirect();
+                redirect("?error=bad_add_job");
 
             } else {
-                var_dump($this->db->error());
+                redirect("?error=bad_edit_job");
             }
         }
     }
@@ -250,9 +247,9 @@ class Backoffice extends CI_Controller
         if(!$this->users->confirm_user(["type"=>"jobs","id"=>$id],$this->user_id)) return false;
 
         if($this->jobs->delete_job($id)){
-            redirect();
+            redirect("?success");
         } else {
-            echo "error";
+            redirect("?error=bad_delete_job");
         }
     }
 

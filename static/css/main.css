@@ -1028,11 +1028,13 @@ input[type=range]:focus::-ms-fill-upper {
 .notification--error {
      background-color: #ffcdd2;
      color: #b71c1c;
+    z-index: 1003;
 }
 
 .notification--success {
     background-color: #DCEDC8;
     color: #33691E;
+    z-index: 1002;
 }
 
 .spinner {

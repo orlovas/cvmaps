@@ -1368,11 +1368,12 @@ function recalculateWeights(name,diff){
 }
 
 function notification(type,text){
-    $(".notification").remove();
+    $(".notification--default").remove();
+    $(".notification--loading").remove();
     $("body").append('<div class="notification notification--'+type+'">'+text+'</div>');
     if(type === "loading"){
-        $(".notification").prepend('<div class="spinner"></div>');
-        $(".notification").delay( 2000 ).fadeOut( 1000 );
+        $(".notification--loading").prepend('<div class="spinner"></div>');
+        $(".notification--loading").delay( 2000 ).fadeOut( 1000 );
     } else {
         $(".notification").delay( 10000 ).fadeOut( 1000 );
     }

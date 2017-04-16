@@ -87,9 +87,9 @@ class User extends CI_Controller {
                     );
 
                     $this->users->writeToken($token,$prelogin[0]['id'],$expire);
-                    redirect();
+                    redirect("?success=login");
                 } else {
-                    echo "not correct pass";
+                    redirect("?error=bad_login");
                 }
             } else {
                 $this->output->set_output("Email not found");
@@ -108,7 +108,7 @@ class User extends CI_Controller {
         $this->form_validation->set_rules('high_credit_rating', 'high credit rating', 'trim|required');
 
         if ($this->form_validation->run() == FALSE) {
-            $this->load->view('auth');
+            redirect("?error=bad_registration");
         } else {
             $email = $this->input->post('email');
             $password = $this->input->post('password');
@@ -133,7 +133,7 @@ class User extends CI_Controller {
                 }
 
                 if($this->companies->create_company($register,$name,$average_salary,$high_credit_rating,$logo)){
-                    redirect();
+                    redirect("?success=registration");
                 } else {
                     var_dump($this->db->error());
                 }

@@ -52,7 +52,7 @@ echo form_open('?c=backoffice&m=edit_job&id=');
     <div class="form-row">
         <label for="edit-salary_from">Atlyginimas <small>(EUR, Atskaičius mokesčius)</small></label>
         <div style="display: inline-block;width: 46%;margin-right: 20px;">
-            <label style="display: inline-block;">Nuo <small class="text-danger">*</small></label> <input class="form-control salary" type="number" name="salary_from" id="edit-salary_from">
+            <label style="display: inline-block;">Nuo <small class="text-danger">*</small></label> <input class="form-control salary" type="number" name="salary_from" id="edit-salary_from" required>
         </div>
         <div style="display: inline-block;width:46%">
             <label style="display: inline-block;">Iki</label> <input class="form-control salary" type="number" name="salary_to" id="edit-salary_to">
