@@ -52,48 +52,7 @@
 <body>
 
 <?php
-if(isset($_GET['error'])){
-  echo '<div class="notification notification--error">Įvyko klaida: ';
-  switch($_GET['error']){
-    case "bad_registration":
-          echo "blogai užpildyti registracijos laukai.";
-          break;
-    case "bad_login":
-      echo "vartotojas neegzistuoja arba įvestas neteisingas slaptažodis.";
-      break;
-    case "bad_company_edit":
-      echo "blogai užpildyti įmonės informacijos laukai.";
-      break;
-    case "bad_add_job":
-      echo "blogai užpildyti skelbimo laukai.";
-      break;
-    case "bad_edit_job":
-      echo "blogai užpildyti skelbimo laukai.";
-      break;
-    case "bad_delete_job":
-      echo "nepavyko pašalinti skelbimą.";
-      break;
-    default:
-          break;
-  }
-  echo '</div>';
-}
-
-if(isset($_GET['success'])){
-  echo '<div class="notification notification--success" onshow="alert()">';
-  switch($_GET['success']){
-    case "registration":
-      echo "Jus sekmingai sukūrėte paskyrą. Dabar galite prisijungti su savo el. paštu ir slaptažodžiu";
-      break;
-    case "login":
-      echo "Jus sekmingai prisijungėte.";
-      break;
-    default:
-      echo "Veiksmas sekmingai atliktas.";
-      break;
-  }
-  echo '</div>';
-}
+  $this->load->view('errors/notifications');
 ?>
 
 <header class="header header--map">
@@ -114,7 +73,7 @@ if(isset($_GET['success'])){
 
   <div class="header__right">
     <?php if(is_null($company->id)): ?>
-    <a class="btn btn--medium btn--silver" id="not-authorized"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4IiB2aWV3Qm94PSIwIDAgNDU5IDQ1OSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDU5IDQ1OTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8Zz4KCTxnIGlkPSJleGl0LXRvLWFwcCI+CgkJPHBhdGggZD0iTTE4MS4wNSwzMjEuM2wzNS43LDM1LjdsMTI3LjUtMTI3LjVMMjE2Ljc1LDEwMmwtMzUuNywzNS43bDY2LjMsNjYuM0gwdjUxaDI0Ny4zNUwxODEuMDUsMzIxLjN6IE00MDgsMEg1MSAgICBDMjIuOTUsMCwwLDIyLjk1LDAsNTF2MTAyaDUxVjUxaDM1N3YzNTdINTFWMzA2SDB2MTAyYzAsMjguMDUsMjIuOTUsNTEsNTEsNTFoMzU3YzI4LjA1LDAsNTEtMjIuOTUsNTEtNTFWNTEgICAgQzQ1OSwyMi45NSw0MzYuMDUsMCw0MDgsMHoiIGZpbGw9IiMwMDAwMDAiLz4KCTwvZz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K"width="14" style="vertical-align: middle;
+    <a class="btn btn--medium btn--silver" id="not-authorized"><img src="data:image/svg+xml;utf8;base64,PD94bWwgdmVyc2lvbj0iMS4wIiBlbmNvZGluZz0iaXNvLTg4NTktMSI/Pgo8IS0tIEdlbmVyYXRvcjogQWRvYmUgSWxsdXN0cmF0b3IgMTYuMC4wLCBTVkcgRXhwb3J0IFBsdWctSW4gLiBTVkcgVmVyc2lvbjogNi4wMCBCdWlsZCAwKSAgLS0+CjwhRE9DVFlQRSBzdmcgUFVCTElDICItLy9XM0MvL0RURCBTVkcgMS4xLy9FTiIgImh0dHA6Ly93d3cudzMub3JnL0dyYXBoaWNzL1NWRy8xLjEvRFREL3N2ZzExLmR0ZCI+CjxzdmcgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4bWxuczp4bGluaz0iaHR0cDovL3d3dy53My5vcmcvMTk5OS94bGluayIgdmVyc2lvbj0iMS4xIiBpZD0iQ2FwYV8xIiB4PSIwcHgiIHk9IjBweCIgd2lkdGg9IjUxMnB4IiBoZWlnaHQ9IjUxMnB4IiB2aWV3Qm94PSIwIDAgNDU5IDQ1OSIgc3R5bGU9ImVuYWJsZS1iYWNrZ3JvdW5kOm5ldyAwIDAgNDU5IDQ1OTsiIHhtbDpzcGFjZT0icHJlc2VydmUiPgo8Zz4KCTxnIGlkPSJleGl0LXRvLWFwcCI+CgkJPHBhdGggZD0iTTE4MS4wNSwzMjEuM2wzNS43LDM1LjdsMTI3LjUtMTI3LjVMMjE2Ljc1LDEwMmwtMzUuNywzNS43bDY2LjMsNjYuM0gwdjUxaDI0Ny4zNUwxODEuMDUsMzIxLjN6IE00MDgsMEg1MSAgICBDMjIuOTUsMCwwLDIyLjk1LDAsNTF2MTAyaDUxVjUxaDM1N3YzNTdINTFWMzA2SDB2MTAyYzAsMjguMDUsMjIuOTUsNTEsNTEsNTFoMzU3YzI4LjA1LDAsNTEtMjIuOTUsNTEtNTFWNTEgICAgQzQ1OSwyMi45NSw0MzYuMDUsMCw0MDgsMHoiIGZpbGw9IiMwMDAwMDAiLz4KCTwvZz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8Zz4KPC9nPgo8L3N2Zz4K" width="14" style="vertical-align: middle;
 margin-bottom: 2px;
 margin-right: 3px;" /> Prisijungti / Registruotis</a>
       <div class="authorize">
@@ -145,37 +104,11 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
         <div class="select-field">
           <select name="category_id" id="category_id">
             <option value="0" selected="selected">Visos darbo sritis</option>
-            <option value="29">Sezoninis darbas</option>
-            <option value="30">Darbas neįgaliesiems</option>
-            <option value="31">Papildomas darbas</option>
-            <option value="1">Administravimas</option>
-            <option value="2">Apsauga</option>
-            <option value="3">Apskaita, Finansai, Auditas</option>
-            <option value="4">Dizainas, Architektūra</option>
-            <option value="5">Energetika, Elektronika</option>
-            <option value="6">Informacinės technologijos</option>
-            <option value="7">Inžinerija, Mechanika</option>
-            <option value="8">Klientų aptarnavimas, Paslaugos</option>
-            <option value="9">Maisto gamyba</option>
-            <option value="10">Marketingas, Reklama</option>
-            <option value="11">Medicina, Sveikatos apsauga, Farmacija 	</option>
-            <option value="12">Nekilnojamasis turtas</option>
-            <option value="13">Pardavimų vadyba</option>
-            <option value="14">Personalo valdymas</option>
-            <option value="15">Pirkimai, Tiekimas</option>
-            <option value="16">Pramonė, Gamyba</option>
-            <option value="17">Prekyba - konsultavimas</option>
-            <option value="18">Sandėliavimas</option>
-            <option value="19">Statyba</option>
-            <option value="20">Švietimas, Mokymai, Kultūra</option>
-            <option value="21">Teisė</option>
-            <option value="22">Transporto vairavimas</option>
-            <option value="23">Transporto/logistikos vadyba</option>
-            <option value="24">Vadovavimas, Valdymas</option>
-            <option value="25">Valstybės tarnyba</option>
-            <option value="26">Viešbučiai</option>
-            <option value="27">Žemės ūkis, žuvininkystė</option>
-            <option value="28">Žiniasklaida, Viešieji ryšiai</option>
+            <?php
+              foreach($categories as $category){
+                echo '<option value="'.$category['category_id'].'">'.$category['category_name'].'</option>';
+              }
+            ?>
           </select>
           </div>
       </div>
@@ -184,14 +117,11 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
           <div class="select-field">
             <select name="edu_id" id="edu_id">
               <option value="0" selected="selected">Visi išsilavinimo rūšiai</option>
-              <option value="1">Aukštasis neuniversitetinis</option>
-              <option value="2">Aukštasis universitetinis</option>
-              <option value="3">Aukštesnysis išsilavinimas</option>
-              <option value="4">Magistras</option>
-              <option value="5">Nebaigtas vidurinis</option>
-              <option value="6">Profesinė mokykla</option>
-              <option value="7">Specialusis vidurinis</option>
-              <option value="8">Vidurinis</option>
+              <?php
+                foreach($educations as $education){
+                  echo '<option value="'.$education['id'].'">'.$education['name'].'</option>';
+                }
+              ?>
             </select>
           </div>
         </div>
@@ -329,11 +259,13 @@ cursor: pointer;">Parodyti paieškos langą ir skelbimų sąrašą</div>
   <div class="window" id="edit_job" style="display: none;">
     <?php $this->load->view('forms/edit_job'); ?>
   </div>
-    <div id="color-scale" style="display:none"><img src="static/images/color-scale.png"></div>
-	<div id="map"></div>
-	<script src="<?php echo base_url(); ?>static/js/markerclusterer.js" async></script>
 
-	<script src="<?php echo base_url(); ?>static/js/main.js?v=1"></script>
-	<script src="//maps.googleapis.com/maps/api/js?key=AIzaSyAJhXhTIxa5iUsy3FQA5bERrbbxdEZ7Cls&libraries=places&language=lt&region=LT&callback=getMarkers"></script>
+  <div id="color-scale" style="display:none"><img src="<?php echo base_url(); ?>static/images/color-scale.png"></div>
+
+  <div id="map"></div>
+
+  <script src="<?php echo base_url(); ?>static/js/markerclusterer.min.js" async></script>
+  <script src="<?php echo base_url(); ?>static/js/main.js?v=1.0"></script>
+  <script src="//maps.googleapis.com/maps/api/js?key=AIzaSyAJhXhTIxa5iUsy3FQA5bERrbbxdEZ7Cls&libraries=places&language=lt&region=LT&callback=getMarkers"></script>
 </body>
 </html>

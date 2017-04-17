@@ -1,15 +1,22 @@
 <?php
 
 class Q extends CI_Controller {
+    /**
+     * Q constructor.
+     */
     public function __construct()
     {
         parent::__construct();
-        $this->load->model('queries');
+        $this->load->model('queries'); // bendra klasė, visų pirma skirta duomenų tvarkimui iš žemėlapio valdanti kodo
         $this->load->helper('url_helper');
     }
 
+    /**
+     * Atvaizduoja skelbimų žymes JSON pavidalu
+     */
     public function m()
     {
+        // Parametrų skaitymas iš URL
         $category_id = $this->input->get('category_id', TRUE);
 		$city_id = $this->input->get('city_id', TRUE);
 		$edu_id = $this->input->get('edu_id', TRUE);
@@ -23,12 +30,19 @@ class Q extends CI_Controller {
         )));
     }
 
+    /*
+     * Atvaizduoja skelbimus JSON pavidalu. Viename puslapyje rodoma tik 30 skelbimų, todėl užklausoje reikia nurodyti
+     * kurį puslapį užkrauti
+     */
     public function j()
     {
         $page = $this->input->get('page', TRUE);
+
 		if(!isset($page)){
 			$page = 1;
 		}
+
+        // Parametrų skaitymas iš URL
 		$category_id = $this->input->get('category_id', TRUE);
 		$city_id = $this->input->get('city_id', TRUE);
 		$edu_id = $this->input->get('edu_id', TRUE);
@@ -42,7 +56,8 @@ class Q extends CI_Controller {
             && isset($city_id)
             && isset($category_id)
             && isset($edu_id)
-            && isset($salary)) {
+            && isset($salary)
+        ) {
             $this->output->set_content_type('application/json');
             $this->output->set_output(json_encode($this->queries->get_jobs(
                 $page,$order_by,$city_id,$category_id,$edu_id,$salary,$work_time_id,$user_id
@@ -51,25 +66,9 @@ class Q extends CI_Controller {
 
     }
 
-    /*public function get_job($id)
-    {
-        $this->output->set_content_type('application/json');
-        $this->output->set_output(json_encode($this->queries->get_job_by_id($id)));
-        if(isset($_POST['username']) && isset($_POST['password'])){
-            $username=$_POST['username'];
-            $password=$_POST['password'];
-
-            $query=mysql_query("SELECT * FROM users WHERE username='$username'");
-
-            if(mysql_num_rows($query)>0){
-                echo 'Užimta';
-            } else {
-                mysql_query("INSERT INTO users (username, password) VALUES ('$username','$password')");
-                header("location:index.php");
-            }
-        }
-    }*/
-
+    /*
+     * Skelbimų atvaizdavimas pagal 'id' JSON pavidalu
+     */
     public function get_jobs()
     {
         $ids = $this->input->get('ids', TRUE);
@@ -77,14 +76,13 @@ class Q extends CI_Controller {
         $this->output->set_output(json_encode($this->queries->get_jobs_by_ids($ids)));
     }
 
-    /*public function find_job($query_text = "")
-    {
-        $this->output->set_content_type('application/json');
-        $this->output->set_output(json_encode($this->queries->find_job_by_title($query_text)));
-    }*/
 
+    /*
+     * Funkcija grąžina skelbimų skaičių JSON pavidalu pagal nurodytus parametrus
+     */
     public function init_param()
     {
+        // Parametrų skaitymas iš URL
         $category_id = $this->input->get('category_id', TRUE);
 		$city_id = $this->input->get('city_id', TRUE);
 		$edu_id = $this->input->get('edu_id', TRUE);
@@ -98,7 +96,11 @@ class Q extends CI_Controller {
         )));
     }
 
-    public function redirect(){
+    /*
+     * Trumpos nuorodos konvertavimas ir nukreipimas į originalą
+     */
+    public function redirect()
+    {
         $id = $this->input->get('u',TRUE);
         $url = $this->queries->get_url_by_id($id);
         redirect($url->url);

@@ -1,11 +1,19 @@
 <?php
 
 class Users extends CI_Model {
+    /**
+     * Users constructor.
+     */
     public function __construct()
     {
         $this->load->database();
     }
 
+    /**
+     * Metodas patikrina vartotojo egzistavimą pagal e-mail
+     * @param $email
+     * @return array
+     */
     public function prelogin($email)
     {
         $this->db->select("id, password, group_id");
@@ -16,22 +24,21 @@ class Users extends CI_Model {
         return $query->result_array();
     }
 
-    public function register($email,$password,$group_id,$email_subscription,$partners_subscription)
+    /**
+     * Metodas į vartotojų lentėlę prideda naują įrašą apie naują vartotoją
+     * @param $email
+     * @param $password
+     * @param $group_id
+     * @param $email_subscription
+     * @param $partners_subscription
+     * @return bool
+     */
+    public function register($email, $password, $group_id, $email_subscription, $partners_subscription)
     {
-
+        // Tikriname ar jau yra naudojamas toks e-mail sistemoje
         if($this->existEmail($email)){
             return false;
         }
-
-        /**
-         * Encrypt password
-         */
-
-        $options = [
-            'cost' => 11
-        ];
-
-        $password = password_hash($password, PASSWORD_BCRYPT, $options);
 
         $data = array(
             'email' => $email,
@@ -43,12 +50,14 @@ class Users extends CI_Model {
 
         $this->db->insert('users', $data);
 
-
-
         return $this->db->insert_id();
-
     }
 
+    /**
+     * Metodas ieško el. pašto sutapimus vartotojų lentėlyje
+     * @param $email
+     * @return int
+     */
     private function existEmail($email)
     {
         $this->db->select("email");
@@ -57,7 +66,13 @@ class Users extends CI_Model {
         return ($this->db->count_all_results() ? 1 : 0);
     }
 
-    public function writeToken($token,$user_id,$expires)
+    /**
+     * Metodas įrašo į vartotojų lentėlę duomenis apie slapuką
+     * @param $token
+     * @param $user_id
+     * @param $expires
+     */
+    public function writeToken($token, $user_id, $expires)
     {
         $data = array(
             'token' => $token,
@@ -68,11 +83,20 @@ class Users extends CI_Model {
         $this->db->insert('user_tokens', $data);
     }
 
+    /**
+     * Slapuko pašalinimas iš duombazes
+     * @param $token
+     */
     public function deleteToken($token)
     {
         $this->db->delete('user_tokens', array('token' => $token));
     }
 
+    /**
+     * Vartotojo prisijungimas iš slapukų
+     * @param $token
+     * @return bool
+     */
     public function loginFromCookies($token)
     {
         $this->db->select("user_id,token,expires");
@@ -88,10 +112,16 @@ class Users extends CI_Model {
         }
     }
 
-    public function confirm_user($data,$user_id)
+    /**
+     * Tikrinimi vartotojo teisės
+     * @param $data
+     * @param $user_id
+     * @return bool
+     */
+    public function confirm_user($data, $user_id)
     {
         $query = $this->db->select("id")->from($data["type"])->where(array("id"=>$data["id"],"user_id"=>$user_id))->get()->row();
-        if($query) return true;
+        return $query ? true : false;
     }
 
 }

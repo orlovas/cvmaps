@@ -1,13 +1,22 @@
 <?php
-// JA NEOCHEN UMNYJ.
+
 class Jobs extends CI_Model
 {
+    /**
+     * Jobs constructor.
+     */
     public function __construct()
     {
         parent::__construct();
         $this->load->database();
     }
 
+    /**
+     * Gauti vartotojo skelbimus
+     * @param $user_id
+     * @param bool|false $json
+     * @return array
+     */
     public function getUserJobs($user_id, $json = false)
     {
         if($json){
@@ -29,6 +38,11 @@ class Jobs extends CI_Model
         return $query->result_array();
     }
 
+    /**
+     * Gauti vartotojo darbų skaičių
+     * @param $user_id
+     * @return object
+     */
     public function getUserJobsInit($user_id)
     {
         $this->db->select("COUNT(id) AS jobs")->from("jobs")->where('user_id',$user_id);
@@ -36,6 +50,22 @@ class Jobs extends CI_Model
         return $query->row();
     }
 
+    /**
+     * Metodas sukuria skelbimų lentėlyje naują įrašą - naują darbo skelbimą
+     * @param $company_id
+     * @param $user_id
+     * @param $title
+     * @param $city_id
+     * @param $address
+     * @param $category_id
+     * @param $salary_from
+     * @param $salary_to
+     * @param $work_time_id
+     * @param $edu_id
+     * @param $url_id
+     * @param $marker_id
+     * @return bool
+     */
     public function add_job(
         $company_id,
         $user_id,
@@ -70,6 +100,23 @@ class Jobs extends CI_Model
         return true;
     }
 
+    /**
+     * Išsaugoti skelbimo pakeitimus duomenų bazėje
+     * @param $id
+     * @param $company_id
+     * @param $user_id
+     * @param $title
+     * @param $city_id
+     * @param $address
+     * @param $category_id
+     * @param $salary_from
+     * @param $salary_to
+     * @param $work_time_id
+     * @param $edu_id
+     * @param $url_id
+     * @param $marker_id
+     * @return bool
+     */
     public function edit_job(
         $id,
         $company_id,
@@ -105,6 +152,11 @@ class Jobs extends CI_Model
         return true;
     }
 
+    /**
+     * Metodas pašalina skelbimą iš duomenų bazės. Taip pat šalinami žymė ir originalaus skelbimo URL.
+     * @param $id
+     * @return bool
+     */
     public function delete_job($id)
     {
         $job = $this->get_job_by_id($id);
@@ -117,6 +169,11 @@ class Jobs extends CI_Model
         return true;
     }
 
+    /**
+     * Metodas pašalina žymę
+     * @param $marker_id
+     * @return bool
+     */
     public function delete_marker($marker_id)
     {
         if($this->db->where('id', $marker_id)->delete('markers')){
@@ -126,6 +183,11 @@ class Jobs extends CI_Model
         }
     }
 
+    /**
+     * Metodas pašalina originalaus skelbimo URL
+     * @param $url_id
+     * @return bool
+     */
     public function delete_url($url_id)
     {
         if($this->db->where('id', $url_id)->delete('urls')){
@@ -136,6 +198,11 @@ class Jobs extends CI_Model
 
     }
 
+    /**
+     * Metodas įtraukia naują origin. skelbimo URL į duombazę
+     * @param $url
+     * @return mixed
+     */
     public function add_url($url){
         $data = array(
             'url' => $url
@@ -144,6 +211,10 @@ class Jobs extends CI_Model
         return $this->db->insert_id();
     }
 
+    /**
+     * @param $coordinates
+     * @return mixed
+     */
     public function add_marker($coordinates){
         $data = array(
             'lat' => $coordinates[0],
@@ -153,6 +224,11 @@ class Jobs extends CI_Model
         return $this->db->insert_id();
     }
 
+    /**
+     * Metodas ieško skelbimą pagal nurodytą id
+     * @param $id
+     * @return object/bool
+     */
     public function get_job_by_id($id){
         $this->db->select("jobs.id, user_id, title, address, category_id, city_id, work_time_id, salary_from, salary_to, edu_id, url_id, marker_id, urls.url AS url, markers.lat AS lat, markers.lng AS lng");
         $this->db->from('jobs');
@@ -165,13 +241,22 @@ class Jobs extends CI_Model
         } else {
             return false;
         }
-
     }
 
+    /**
+     * Metodas ieško URL pagal nurodyta id
+     * @param $url_id
+     * @return mixed
+     */
     public function get_url_by_id($url_id){
         return $this->db->select("url")->from('urls')->where("id",$url_id)->get()->row();
     }
 
+    /**
+     * Metodas ieško darbo adresą pagal nurodytą id
+     * @param $id
+     * @return mixed
+     */
     public function get_job_address($id){
         return $this->db->select("address")->from('jobs')->where("id",$id)->get()->row();
     }

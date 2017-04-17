@@ -1,6 +1,7 @@
 'use strict';
 
 var map, markers = [], markerCluster = {};
+
 var _p = 1,
     _order_by = "date_desc",
     _city_id = 0,
@@ -9,14 +10,17 @@ var _p = 1,
     _salary = 0,
     _work_time = 0;
 
-var c = []; // coordinates
-var j = []; // jobs
-var tp = 0; // total pages
-var dp = []; // downloaded pages
-var home_marker = [];
-var home_radius = [];
-var set_home_position;
-var search_radius = 2000;
+var c = []; // skelbimo koordinačių masyvas
+var j = []; // skelbimų masyvas
+
+var tp = 0; // iš visų puslapių
+var dp = []; // išsaugoti puslapiai
+
+var search_radius = 2000,
+    home_marker = [],
+    home_radius = [],
+    set_home_position;
+
 var cluster_options = {
     imagePath: CVMaps.paths.i()+'m',
     gridSize: 40,

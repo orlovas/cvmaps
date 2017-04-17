@@ -1,4 +1,7 @@
-/*! normalize.css v3.0.2 | MIT License | git.io/normalize */
+/*
+    Normalize
+    ! normalize.css v3.0.2 | MIT License | git.io/normalize
+*/
 
 html {
     -ms-text-size-adjust: 100%;
@@ -14,7 +17,6 @@ figcaption,
 figure,
 footer,
 header,
-hgroup,
 main,
 menu,
 nav,
@@ -182,6 +184,11 @@ td,
 th {
     padding: 0
 }
+
+/*
+    Helpers
+*/
+
 *,
 *:before,
 *:after {
@@ -218,6 +225,20 @@ th {
 .bottom {
     vertical-align: bottom
 }
+
+.tiny-hr {
+    border: 0;
+    height: 1px;
+    background-color: #dddddd;
+}
+
+.text-danger {
+    color: red;
+}
+
+/*
+    Links
+*/
 a:focus{
     background-color: #fffdec !important
 }
@@ -278,6 +299,11 @@ a:hover {
     color: gray;
     opacity: 1
 }
+
+/*
+    Header
+*/
+
 .header {
     width: 100%;
     display: block;
@@ -343,25 +369,10 @@ a:hover {
     right: 15px;
 }
 
-.menu {
-    background: #f2f2f2;
-    border-bottom: 3px solid #ddd;
-    position: relative;
-    display: block;
-    font-size: 0.938em;
-    margin: 0 -20px 15px -20px;
-    padding: 10px 20px
-}
-.menu ul {
-    list-style-type: none;
-    margin: 0;
-    padding: 0
-}
-.menu ul li {
-    display: inline-block;
-    padding: 0;
-    margin: 0 20px 0 0
-}
+/*
+    Window
+*/
+
 .window {
     background-color: white;
     border-radius: 4px;
@@ -372,59 +383,7 @@ a:hover {
     width: 400px;
     z-index: 9999;
 }
-.window__search {
-    background-color: #ffffff;
-}
-.window__search .search-field {
-    background-color: white;
-    border: 0;
-    border-bottom: 3px solid #077ab9;
-    border-radius: 4px;
-    margin-top: 5px
-}
-.window__search .search-text {
-    border: 0;
-    color: #444;
-    font-size: 1em;
-    height: 35px;
-    margin: 0 10px;
-    outline: 0;
-    width: 230px
-}
-.window__search .search {
-    position: relative;
-    top: 4px
-}
-.window__search .search,
-.window__search .dropdown {
-    background: white;
-    border: 0;
-    outline: 0
-}
-.window__search .dropdown-replace,
-.window__search .search-replace {
-    display: none
-}
-.window__search .search svg,
-.window__search .dropdown svg {
-    fill: #a2a2a2
-}
-.window__search .search:hover svg,
-.window__search .dropdown:hover svg {
-    fill: black
-}
-.window__search .search-dropdown {
-    position: absolute;
-    background-color: white;
-    color: #444;
-    display: none;
-    width: 100%;
-    max-width: 320px;
-    border-bottom-left-radius: 4px;
-    border-bottom-right-radius: 4px;
-    border: 1px solid #eaeaea;
-    padding: 5px
-}
+
 .no-bottom-radius {
     border-bottom-left-radius: 0 !important;
     border-bottom-right-radius: 0 !important
@@ -444,13 +403,7 @@ a:hover {
     font-weight: 600;
     cursor: pointer;
     font-family: inherit;
-    /*background-color: transparent;*/
     padding: 5px;
-    /*border: none;
-    border-bottom: 2px solid #81c4e8;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    appearance: none;*/
 }
 .window__sort .select-field {
     position: relative;
@@ -586,6 +539,10 @@ opacity: 0.5;
     width: 26%
 }
 
+/*
+    Buttons
+*/
+
 .btn {
     border-radius: 4px;
     text-decoration: none;
@@ -681,6 +638,9 @@ opacity: 0.5;
     padding: 6px 0
 }
 
+/*
+    Google Maps
+*/
 
 .gm-style-iw * {
     font-family: Arial, sans-serif;
@@ -758,6 +718,10 @@ opacity: 0.5;
     font-size: 0.7em;
 }
 
+/*
+    Search and parameters
+*/
+
 #pac-input{
     border: 0;
     width: 335px;
@@ -829,13 +793,13 @@ input[type=range]::-ms-track {
 input[type=range]::-ms-fill-lower {
   background: #81c4e8;
 
-  border-radius: 2.6px;
+  border-radius: 3px;
 
 }
 input[type=range]::-ms-fill-upper {
   background: #3071a9;
 
-  border-radius: 2.6px;
+  border-radius: 3px;
 
 }
 input[type=range]::-ms-thumb {
@@ -852,71 +816,9 @@ input[type=range]:focus::-ms-fill-upper {
   background: #81c4e8;
 }
 
-.sort-range{
-    padding: 0;
-}
-
-#color-scale{
-    position: absolute;z-index: 1000;bottom: 0;right: 0;margin: 14px 45px;
-}
-
-.offer-gauge{
-            background: url("../images/gauge.png");
-            width: 40px;
-            height: 20px;
-            margin-left: 5px;
-            margin-bottom: 3px;
-        }
-        .gauge-arrow{
-            position: relative;
-            background-color: #666666;
-            width: 16px;
-            height: 2px;
-            top: 14px;
-            border: 2px solid white;
-            transform: rotate(0deg);
-            transform-origin: right;
-            box-sizing: content-box;
-        }
-
-.set_home_position{
-    background: none;
-    border: 0;
-    border-left: 1px solid silver;
-    margin: 0;
-    padding: 0;
-    position: relative;
-    top: 3px;
-}
-
-.set_home_position_icon{
-    fill: silver;
-    margin: 0 10px;
-}
-
-.set_home_position:hover .set_home_position_icon{
-    fill: black;
-}
-
-.set_home_position_active .set_home_position_icon{
-    fill: #0288d1;
-}
-
-.loading{
-    display: none;
-    position: absolute;
-    top:0;
-    width: 100%;
-    height: 4px;
-    background: #0288d1;
-    z-index: 1000;
-    transition: all 0.5s;
-}
-
-.loading-screen{
-    /*display: none;*/
-    position: absolute;
-}
+/*
+    Backoffice
+*/
 
 .authorize,
 .edit-company{
@@ -948,11 +850,11 @@ input[type=range]:focus::-ms-fill-upper {
     margin-bottom: 2px;
 }
 
-.form-row input, select {
+.form-row input,
+select {
     width: 100%;
     height: 26px;
     font-size: 0.825em;
-
 }
 
 .form-column{
@@ -965,16 +867,6 @@ input[type=range]:focus::-ms-fill-upper {
     font-weight: 600;
 }
 
-.tiny-hr {
-    border: 0;
-    height: 1px;
-    background-color: #dddddd;
-}
-
-.text-danger {
-    color: red;
-}
-
 #enable_upload{
     cursor: pointer;
 }
@@ -982,28 +874,14 @@ input[type=range]:focus::-ms-fill-upper {
     vertical-align: middle;
 }
 
-#add_job,#edit_job{
+#add_job,
+#edit_job{
     padding: 10px;
 }
 
-.weights{
-    position: absolute;
-    z-index: 1;
-    right: 0;
-    background: white;
-    margin: 10px;
-    padding: 10px;
-    font-size: 0.8em;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
-}
-
-.weights b {
-    display: block;
-    padding-bottom: 5px;
-    margin-bottom: 5px;
-    border-bottom: 1px solid silver;
-    color: #666;
-}
+/*
+    Notifications
+*/
 
 .notification {
     display: block;
@@ -1026,8 +904,8 @@ input[type=range]:focus::-ms-fill-upper {
 }
 
 .notification--error {
-     background-color: #ffcdd2;
-     color: #b71c1c;
+    background-color: #ffcdd2;
+    color: #b71c1c;
     z-index: 1003;
 }
 
@@ -1068,6 +946,65 @@ input[type=range]:focus::-ms-fill-upper {
       }
 }
 
+/*
+    Miscellaneous
+*/
+
+.sort-range{
+    padding: 0;
+}
+
+#color-scale{
+    position: absolute;
+    z-index: 1000;
+    bottom: 0;
+    right: 0;
+    margin: 14px 45px;
+}
+
+.offer-gauge{
+    background: url("../images/gauge.png");
+    width: 40px;
+    height: 20px;
+    margin-left: 5px;
+    margin-bottom: 3px;
+}
+
+.gauge-arrow{
+    position: relative;
+    background-color: #666666;
+    width: 16px;
+    height: 2px;
+    top: 14px;
+    border: 2px solid white;
+    transform: rotate(0deg);
+    transform-origin: right;
+    box-sizing: content-box;
+}
+
+.set_home_position{
+    background: none;
+    border: 0;
+    border-left: 1px solid silver;
+    margin: 0;
+    padding: 0;
+    position: relative;
+    top: 3px;
+}
+
+.set_home_position_icon{
+    fill: silver;
+    margin: 0 10px;
+}
+
+.set_home_position:hover .set_home_position_icon{
+    fill: black;
+}
+
+.set_home_position_active .set_home_position_icon{
+    fill: #0288d1;
+}
+
 .hide-window {
     position: absolute;
     background-color: #0075b4;
@@ -1085,4 +1022,23 @@ input[type=range]:focus::-ms-fill-upper {
 
 .hide-window:hover{
     margin-left: 400px;
+}
+
+.weights{
+    position: absolute;
+    z-index: 1;
+    right: 0;
+    background: white;
+    margin: 10px;
+    padding: 10px;
+    font-size: 0.8em;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+}
+
+.weights b {
+    display: block;
+    padding-bottom: 5px;
+    margin-bottom: 5px;
+    border-bottom: 1px solid silver;
+    color: #666;
 }
