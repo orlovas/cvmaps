@@ -23,6 +23,13 @@
         crossorigin="anonymous"></script>
 
   <script>
+    var CVMaps = {
+      paths: {
+        h: document.URL.substr(0,document.URL.lastIndexOf('/')) + "/",
+        s: function(){return this.h + "static/"},
+        i: function(){return this.s() + "images/"}
+      }
+    };
     var param = {
       jobs: 0,
       user_id: <?php echo (isset($user_id) ? $user_id : 0); ?>,
