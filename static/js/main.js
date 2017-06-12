@@ -30,13 +30,13 @@ var cluster_options = {
 var children = [];
 
 /*
-    Load homepage parameters and load up jobs list
+    Užkrauti pirminius parametrus, kurie naudojami tolimesnėse užklausose
  */
 
 initParam();
 
 /*
-#    Initiators   #
+#    Iniciatoriai (Init funkcijos)   #
 */
 
 function initParam(confirm){
@@ -58,7 +58,7 @@ function initParam(confirm){
             param.jobs = p.jobs;
         },
         complete: function(){
-            // loading jobs if parameters set
+            // Užkrauti skelbimus jeigu parametrai nustatyti
             if(j.length < 1) getJobs(confirm);
         }
 	});
@@ -76,7 +76,7 @@ function initList() {
         end = (start + 30);
     }
 
-    // vycheslenie kol-vo objavlenij na poslednej stranice
+    // Skelbimų skaičius nustatymas paskutiniame puslapyje
     if(_p == tp){
         end = start + (param.jobs - (tp - 1) * 30);
     }
@@ -115,7 +115,7 @@ function initList2() {
         end = (start + 30);
     }
 
-    // vycheslenie kol-vo objavlenij na poslednej stranice
+    // Skelbimų skaičius nustatymas paskutiniame puslapyje
     if(_p == tp){
         end = start + (param.jobs - (tp - 1) * 30);
     }
@@ -159,10 +159,12 @@ var cvMapsStyle=new google.maps.StyledMapType([{"featureType":"administrative","
 
     map.addListener('dragstart', function() {
         $(".window").css({ opacity: 0.5 });
+        $("#toggle_list").css({ opacity: 0 });
     });
 
     map.addListener('dragend', function() {
         $(".window").css({ opacity: 1 });
+        $("#toggle_list").css({ opacity: 1 });
     });
 }
 
@@ -218,7 +220,7 @@ function initAddressBox2(){
 }
 
 /*
-#    Getters  #
+#    Get funkcijos  #
  */
 
 function getMarkers(){
@@ -254,7 +256,7 @@ function getMarkers(){
 }
 
 function getJobs(confirm){
-    notification("loading","Vyksta darboviečių kelimas iš duomenų bazes");
+    notification("loading","Vyksta darboviečių kėlimas iš duomenų bazes");
     confirm = typeof confirm !== 'undefined' ? confirm : 0;
     $.ajax({
        type: "GET",
@@ -282,7 +284,7 @@ function getJobs(confirm){
                     salary_to: val.salary_to,
                     url: val.url
                 });
-                // Be sure all jobs pushed to j
+                // Tikriname, ar visi darbai įrašyti j masyve
                 if(key == response.length-1){
                     initList();
                 }
@@ -324,7 +326,7 @@ function getJobs(confirm){
 }
 
 /*
-#     Renders     #
+#     Rendereriai (Render funkcijos)     #
  */
 
 function renderMarkers(){
@@ -396,7 +398,7 @@ function renderMarkers(){
                                             var childs_arr_id = arrayObjectIndexOf(children,val.id,"id");
 
                                             if(childs_arr_id >= 0){
-                                                content += '<li><div style="color:'+children[childs_arr_id].color+'; font-size:'+(children[childs_arr_id].scale+5)+'px"><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+val.u+'" target="_blank">'+val.title+'</a></div>';
+                                                content += '<li><div><a style="color:'+children[childs_arr_id].color+'; font-size:'+(children[childs_arr_id].scale+5)+'px" href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+val.u+'" target="_blank">'+val.title+'</a></div>';
                                             } else {
                                                 content += '<li><div><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+val.u+'" target="_blank">'+val.title+'</a></div>';
                                             }
@@ -429,7 +431,7 @@ function renderMarkers(){
 }
 
 /*
-#    Search, order and filter functions   #
+#    Paieškos, tvarkymo ir filtravimo funkcijos   #
  */
 $("#category_id").on("change", function(){
    _category_id = parseInt($("#category_id").val());
@@ -480,7 +482,7 @@ $("#distance").on("input change", function(e){
 });
 
 /*
-#    Home setter functions  #
+#    Namo adreso nustatymo funkcijos  #
  */
 
 function enableSetHomePosition(){
@@ -553,18 +555,13 @@ function placeMarkerAndPanTo(latLng, map) {
         disableSetHomePosition();
     }
 
-    // Need to show map faster, not calculate nearest
     findNearest(latLng.lat(),latLng.lng());
 }
 
 /*
-#    Job price calculation functions    #
+#    Skelbimų 'kainos' nustatymo funkcijos    #
  */
 
-/*
-    V locations, pervaja koordinata, eto ta, ot kotoroj schitaem (dom. adres).
-    Mapzen dejstvuet na ogranichenno rasstojanie ot tochek (~200km), poetomu snachalo nuzhno vybrat gorod.
- */
 function getDuration(origin){
     notification("loading","Apskaičiuojami atstumai iki darbo vietų");
     var destinations = "";
@@ -585,25 +582,27 @@ function getDuration(origin){
         restoreJobRanking();
         return;
     }
+    /*
+        Locations parametruose, pirma reikšmė - vieta, nuo kurios skaičiuojame atstumas
+     */
     $.ajax({
       type: 'GET',
-      url: 'http://matrix.mapzen.com/one_to_many',
+      url: 'https://matrix.mapzen.com/one_to_many',
         data: {
             json: '{' +
             '"locations":' +
                 '[{"lat":'+origin[0]+',"lon":'+origin[1]+'},'+destinations+'],' +
             '"costing":' +
-                '"pedestrian",' +
-            '"api_key":' +
-                '"mapzen-cqWzJVB"' +
-            '}'
+                '"pedestrian"' +
+            '}',
+            api_key: "mapzen-cqWzJVB"
         },
       dataType: 'json',
       success: function(jsonData) {
           jQuery.each( jsonData.one_to_many[0], function( i, val ) {
               if(val.to_index != 0){
-                  /* c[i-1] - t.k. koordinaty idut po ocheredi, a samyj pervyj - start, poetomu ejo
-                    ignoriruem (val.to_index != 0)
+                  /* c[i-1] - dėl to, kad pirmas rezultatas tai taškas nuo kurio skaičiavome atstumą, ir jis
+                    bus lygus nuliui, todėl ignoruojame
                   */
                   var id = arrayObjectIndexOf(j,nearest_jobs[i-1].id,"id");
                   j[id].time = round((val.time/60),1);
@@ -631,6 +630,9 @@ function findNearest(lat,lng){
     getDuration([lat,lng]);
 }
 
+/*
+    Nenaudojama funkcija, kurio tikslas rodyti TIK šalia esančius skelbimus
+ */
 function showOnlyNearest(){
     markerCluster.clearMarkers();
     for(var i=0; i< c.length; i++){
@@ -688,9 +690,11 @@ function restoreJobRanking(){
 }
 
 function jobRanking(){
-    // Return all markers', c[], j[] and other parameters to default
+    // marker, c[], j[] ir kt. parametrų reišmių nustatymas pagal nutylėjimą
 	restoreJobRanking();
+
     notification("loading","Darbai rūšiojami pagal Jūsų parametrus");
+
     var data = [];
 
     for(var i=0; i< c.length; i++){
@@ -804,7 +808,6 @@ function jobRanking(){
 
 }
 
-// https://stackoverflow.com/questions/11121012/how-to-scale-down-the-values-so-they-could-fit-inside-the-min-and-max-values
 function scaleDownValues(){
     notification("loading","Apskaičiavimo rezultatai ruošiami atvaizdavimui");
 	var min = 15,
@@ -870,7 +873,7 @@ function scaleDownValues(){
 }
 
 /*
-#    Event handlers   #
+#    Įvykių tvarkytojai   #
  */
 
 $("#window_sort_close").click(function(){
@@ -1035,6 +1038,9 @@ function delete_job(el){
             c: "backoffice",
             m: "delete_job",
             id: id
+        },
+        complete: function(){
+            location.reload();
         }
     });
 }
@@ -1133,7 +1139,7 @@ function switchJobs(){
 }
 
 /*
-###    Miscellaneous functions  ###
+#    Kitos funkcijos  #
  */
 
 function clearMarkers(){
@@ -1211,10 +1217,10 @@ function round(number, precision) {
     return roundedTempNumber / factor;
 }
 
-// Haversine formula (http://www.movable-type.co.uk/scripts/latlong.html)
+
 function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
-  var R = 6371; // Radius of the earth in km
-  var dLat = deg2rad(lat2-lat1);  // deg2rad below
+  var R = 6371;
+  var dLat = deg2rad(lat2-lat1);
   var dLon = deg2rad(lon2-lon1);
   var a =
     Math.sin(dLat/2) * Math.sin(dLat/2) +
@@ -1222,7 +1228,7 @@ function getDistanceFromLatLonInKm(lat1,lon1,lat2,lon2) {
     Math.sin(dLon/2) * Math.sin(dLon/2)
     ;
   var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  var d = R * c; // Distance in km
+  var d = R * c;
   return d;
 }
 
@@ -1240,7 +1246,7 @@ function valueToColor(val) {
 	return "rgb(" + r + "," + g + "," + b + ")";
 }
 
-//Function to convert hex format to a rgb color
+// Spalvos konvertavimas iš RGB formato į HEX
 function rgb2hex(rgb){
  rgb = rgb.match(/^rgba?[\s+]?\([\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?,[\s+]?(\d+)[\s+]?/i);
  return (rgb && rgb.length === 4) ? "#" +
@@ -1264,7 +1270,6 @@ function salaryToString(response,key){
 }
 
 function isJobMine(jid){
-
     if(param.user_jobs_ids){
         for(var i= 0; i<param.user_jobs_ids.length; i++){
             if(param.user_jobs_ids[i].id === jid){
