@@ -130,7 +130,9 @@ class Backoffice extends CI_Controller
 
         // Tikrinima, ar visi formos laukai teisingai užpildyti, neleidžiama toliau vykdyti kodą ir rodoma klaidą
         if ($this->form_validation->run() == FALSE) {
-            redirect("?error=bad_add_job");
+            $data["categories"] = $this->queries->get_categories();
+            $data["cities"] = $this->queries->get_cities();
+            $this->load->view('forms/add_job',$data);
         } else {
             // Duomenų iš formos skaitymas
             $title = $this->input->post('title');
@@ -160,9 +162,9 @@ class Backoffice extends CI_Controller
                 $url_id,
                 $marker_id)
             ){
-                redirect("?success");
+
             } else {
-                redirect("?error=bad_add_job");
+
             }
         }
     }

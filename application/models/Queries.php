@@ -276,4 +276,18 @@ class Queries extends CI_Model {
         $query = $this->db->get();
         return $query->row();
     }
+
+    public function categories_crossing($category)
+    {
+        $this->db->select("categories_crossing.category_id,categories.category_name")->from("categories_crossing")
+            ->join('categories','categories.category_id = categories_crossing.category_id')
+            ->where("name",$category);
+        $query = $this->db->get();
+        return $query->row();
+    }
+
+    public function find_city_id_by_name($city)
+    {
+        return $this->db->select("city_id")->from("cities")->where("city_name",$city)->get()->row();
+    }
 }

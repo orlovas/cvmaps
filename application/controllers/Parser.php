@@ -16,18 +16,25 @@ class Parser extends CI_Controller
     public function __construct()
     {
         parent::__construct();
-        $url = $this->input->get('url', TRUE);
+        $this->load->library('form_validation');
+        $this->form_validation->set_rules('url', 'URL', 'trim|required|valid_url');
+        if ($this->form_validation->run() == FALSE) {
+            return;
+        }
+
+        $url = $this->input->post('url', TRUE);
+        $this->load->model('queries');
         $this->url = $url;
         $this->website = $this->confirmWebsite($url);
 
         if (!$this->website['confirmed']) {
-            die("Can't parse this website");
+            return;
         }
 
         $this->page = $this->extractPage();
 
         if ($this->page == "") {
-            die("Can't parse this website");
+            return;
         }
 
         $this->title = $this->extractTitle();
@@ -41,21 +48,31 @@ class Parser extends CI_Controller
     {
         $this->output->set_content_type('application/json');
         $this->output->set_output(json_encode([
-            'url' => $this->url,
-            'website' => $this->website,
+            'website' => $this->website['host'],
             'title' => $this->title,
             'expire' => $this->expire,
             'city' => $this->city,
-            'category' => $this->category,
-            'salary' => $this->salary
+            'city_id' => $this->getCityId(),
+            'category' =>
+                ['original' => $this->category,
+                 'cvm' => $this->categoryCrossing()
+                ],
+            'salary' => $this->salary,
+            "csrfHash" => $this->security->get_csrf_hash()
         ]));
     }
 
     private function confirmWebsite($url)
     {
-        $confirmed = true;
+        $confirmed_list = ["cvbankas.lt","cv.lt","cvonline.lt","cvmarket.lt","dirba.lt","darbai24.lt","vilnius.cvzona.lt","kaunas.cvzona.lt","klaipeda.cvzona.lt"];
 
         $host = $this->detectWebsite($url);
+
+        if(in_array($host,$confirmed_list)){
+            $confirmed = true;
+        } else {
+            $confirmed = false;
+        }
 
         return [
             'host' => $host,
@@ -75,8 +92,10 @@ class Parser extends CI_Controller
 
     private function extractTitle()
     {
-        // cvbankas
-        return $this->page->find('h1', 0)->innertext;
+        if(!$this->page->find('h1', 0)){
+            return null;
+        }
+        return $this->security->xss_clean($this->page->find('h1', 0)->plaintext);
     }
 
     private function extractExpire()
@@ -89,10 +108,11 @@ class Parser extends CI_Controller
                 $expire = DateTime::createFromFormat('Y.m.d', $expire)->format('Y-m-d');
                 break;
             case 'cvmarket.lt':
-                $expire = $this->page->find('#jobTxtRTable > tbody > tr', 2)->find('td',1)->innertext;
-                $expire = DateTime::createFromFormat('Y.m.d', $expire)->format('Y-m-d');
+                /*$expire = $this->page->find('#jobTxtRTable > tbody > tr', 2)->find('td',1)->innertext;
+                $expire = DateTime::createFromFormat('Y.m.d', $expire)->format('Y-m-d');*/
+                $expire = null;
                 break;
-            case 'dirba.lt':
+            case 'darbai24.lt':
                 $expire = $this->page->find('#cont',-2)->find('h3',0)->plaintext;
                 $expire = substr($expire, -10);
                 $expire = DateTime::createFromFormat('Y-m-d', $expire)->format('Y-m-d');
@@ -102,18 +122,21 @@ class Parser extends CI_Controller
             case 'klaipeda.cvzona.lt':
                 $expire = $this->page->find('#tabs-1 > table > tr', 2)->find('td.value',0)->innertext;
                 if(!$this->verifyDate($expire)){
-                    $expire = $this->page->find('#tabs-1 > table > tr', 1)->find('td.value',0)->innertext;
+                    $expire = $this->page->find('#tabs-1 > table > tr', 3)->find('td.value',0)->innertext;
+                    if(!$this->verifyDate($expire)){
+                        $expire = $this->page->find('#tabs-1 > table > tr', 1)->find('td.value',0)->innertext;
+                    }
                 }
                 $expire = DateTime::createFromFormat('Y-m-d', $expire)->format('Y-m-d');
                 break;
             case 'cvonline.lt':
-            case 'darbai24.lt':
+            case 'dirba.lt':
             case 'cv.lt':
             default:
                 return null;
         }
 
-        return $expire;
+        return $this->security->xss_clean($expire);
     }
 
     private function extractCategory()
@@ -123,6 +146,10 @@ class Parser extends CI_Controller
                 $category = $this->page->find('a[data-category]', 2)->innertext;
                 break;
             case 'cv.lt':
+                if(!$this->page->find('#jobTxtRight > span', 0)){
+                    $category = null;
+                    break;
+                }
                 $category = $this->page->find('#jobTxtRight > span', 0)->innertext;
                 break;
             case 'dirba.lt':
@@ -138,7 +165,7 @@ class Parser extends CI_Controller
                 return null;
         }
 
-        return $category;
+        return $this->security->xss_clean($category);
     }
 
     private function extractCity()
@@ -148,18 +175,29 @@ class Parser extends CI_Controller
                 $city = $this->page->find('a[data-category]', 1)->innertext;
                 break;
             case 'cv.lt':
+                if(!$this->page->find('#jobCont01 > span > a', 1)){
+                    $city = null;
+                    break;
+                }
                 $city = $this->page->find('#jobCont01 > span > a', 1)->innertext;
                 break;
             case 'dirba.lt':
                 $city = $this->page->find('.breadcrumb > ol',0)->find('li',-1)->plaintext;
                 break;
             case 'cvonline.lt':
-                $city = $this->page->find('span[itemprop=jobLocation]', 0)->innertext;
+                $city = $this->page->find('span[itemprop=jobLocation]', 0)->plaintext;
+                $city = mb_ereg_replace("\(žemėlapis\)","",$city);
+                $city = trim($city);
                 break;
             case 'cvmarket.lt':
-                $city = $this->page->find('.jobdetails', 0)->find('.jobdetails_value',0)->plaintext;
+                $city = $this->page->find('.jobdetails', 0)->find('.jobdetails_value',0)->innertext;
+                $city = preg_replace('/\s+/', '', $city);
                 break;
             case 'darbai24.lt':
+                if(!$this->page->find('#cont',2)->find('h3',0)){
+                    $city = $this->page->find('#cont',1)->find('h3',0)->plaintext;
+                    break;
+                }
                 $city = $this->page->find('#cont',2)->find('h3',0)->plaintext;
                 break;
             case 'vilnius.cvzona.lt':
@@ -175,13 +213,17 @@ class Parser extends CI_Controller
                 return null;
         }
 
-        return $city;
+        return $this->security->xss_clean($city);
     }
 
     private function extractSalary()
     {
         switch($this->website["host"]){
             case 'cvbankas.lt':
+                if(!$this->page->find('section', 4)->find('.jobad_txt',0)){
+                    $salary = null;
+                    break;
+                }
                 $salary = $this->page->find('section', 4)->find('.jobad_txt',0)->plaintext;
                 $salary = preg_replace('/\s+/', '', $salary);
                 if(intval($salary) != 0){
@@ -191,9 +233,20 @@ class Parser extends CI_Controller
                 }
                 break;
             case 'cv.lt':
-                $salary = $this->page->find('#jobTxtRTable > tbody:nth-child(1) > tr:nth-child(1) > td:nth-child(2)',0)->plaintext;
+                if(!$this->page->find('#jobTxtRTable > tbody:nth-child(1) > tr:nth-child(1)',0)){
+                    $salary = null;
+                    break;
+                }
+                $salary = $this->page->find('#jobTxtRTable > tbody:nth-child(1) > tr:nth-child(1)',0)->find('td',1)->plaintext;
                 $salary = preg_replace('/\s+/', '', $salary);
-                $salary = intval(substr($salary, 24));
+                $salary = preg_replace('/\./', '', $salary);
+                if(intval($salary[0]) == 0){
+                    $salary = substr($salary, 3);
+                }
+                if(!$this->verifySalary($salary)){
+                    $salary = null;
+                }
+                $salary = intval($salary);
                 break;
             case 'cvonline.lt':
                 $salary = $this->page->find('span[itemprop=baseSalary]',0)->plaintext;
@@ -201,12 +254,19 @@ class Parser extends CI_Controller
                 $salary = intval(substr($salary, 18));
                 break;
             case 'cvmarket.lt':
-                $salary = $this->page->find('.jobdetails', 4)->find('.jobdetails_value',0)->plaintext;
+                if(!$this->page->find('.jobdetails', -1)){
+                    return 0;
+                }
+                $salary = $this->page->find('.jobdetails', -1)->find('.jobdetails_value',0)->plaintext;
                 $salary = preg_replace('/\s+/', '', $salary);
-                if(substr($salary,0,2) === "iki"){
+                if(substr($salary,0,1) == "i"){
                     $salary = null;
                 } else {
                     $salary = intval(substr($salary,3));
+                }
+
+                if(!$this->verifySalary($salary)){
+                    $salary = null;
                 }
                 break;
             case 'darbai24.lt':
@@ -217,29 +277,44 @@ class Parser extends CI_Controller
             case 'vilnius.cvzona.lt':
             case 'kaunas.cvzona.lt':
             case 'klaipeda.cvzona.lt':
-                if(!$this->page->find('#tabs-1 > table > tr', 1)->find('td.value > span',0)){
-                    return 0;
-                }
+                if($this->page->find('#tabs-1 > table > tr', 1)->find('td.value > span',0)) {
+                    $salary = $this->page->find('#tabs-1 > table > tr', 1)->find('td.value > span', 0)->innertext;
+                    $salary = preg_replace('/\s+/', '', $salary);
+                } else if($this->page->find('#tabs-1 > table > tr', 2)->find('td.value > span',0)) {
 
-                $salary = $this->page->find('#tabs-1 > table > tr', 1)->find('td.value > span',0)->innertext;
-                $salary = preg_replace('/\s+/', '', $salary);
-
-                if(!$this->verifySalary($salary)){
-                    $salary = $this->page->find('#tabs-1 > table > tr', 2)->find('td.value > span',0)->innertext;
+                    $salary = $this->page->find('#tabs-1 > table > tr', 2)->find('td.value > span', 0)->innertext;
                     $salary = preg_replace('/\s+/', '', $salary);
 
-                    if(!$this->verifySalary($salary)){
-                        $salary = 0;
+                    if (!$this->verifySalary($salary)) {
+                        $salary = null;
                     }
+                } else {
+                    $salary = null;
                 }
                 $salary = intval($salary);
                 break;
             case 'dirba.lt':
+                $salary = $this->page->find('.iR > .s14', 2)->plaintext;
+                if(!$this->verifySalary($salary)){
+                    $salary = $this->page->find('.iR > .s14', 1)->plaintext;
+                }
+                $salary = intval($salary);
+                break;
             default:
                 return null;
         }
 
-        return $salary;
+        return $this->security->xss_clean($salary);
+    }
+
+    private function categoryCrossing()
+    {
+        return $this->queries->categories_crossing($this->category);
+    }
+
+    private function getCityId()
+    {
+        return $this->queries->find_city_id_by_name($this->city);
     }
 
     static public function verifyDate($date, $strict = true)
@@ -256,6 +331,10 @@ class Parser extends CI_Controller
 
     static public function verifySalary($salary)
     {
+        // v cvmarket ili cv.lt eto gde-to nuzhno. Ubral iz-za konfilkta s cvzona
+        if($salary < 50 || $salary > 2016){
+            return false;
+        }
         if(intval($salary)){
             return true;
         }
