@@ -22,6 +22,12 @@ class Backoffice extends CI_Controller
         $this->company_id = $this->getUserCompanyId();
     }
 
+    public function add_company()
+    {
+        $data = [];
+        $this->load->view('forms/add_company',$data);
+    }
+
     /**
      * Firmos duomenų redagavimas
      * @return bool

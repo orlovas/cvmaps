@@ -1266,12 +1266,12 @@ ClusterIcon.prototype.createCss = function(pos) {
         this.height_ + 'px; width:' + this.width_ + 'px; text-align:center;');
   }
 
-  var txtColor = this.textColor_ ? this.textColor_ : 'black';
+  var txtColor = this.textColor_ ? this.textColor_ : 'white';
   var txtSize = this.textSize_ ? this.textSize_ : 11;
 
   style.push('cursor:pointer; top:' + pos.y + 'px; left:' +
       pos.x + 'px; color:' + txtColor + '; position:absolute; font-size:' +
-      txtSize + 'px; font-family:Arial,sans-serif; font-weight:bold');
+      txtSize + 'px; font-family:"Fira Sans",sans-serif; font-weight:500');
   return style.join('');
 };
 

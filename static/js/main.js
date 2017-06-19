@@ -92,7 +92,7 @@ function initList() {
             if(isJobMine(j[i].id)){
                 list.append('<span class="btn btn--small btn--silver" style="margin: 5px 0 0 5px;" id="edit-job" onclick="edit_job(this)" data-id="'+j[i].id+'">Redaguoti</span> <span style="margin: 5px 0 0 5px;" class="btn btn--small btn--silver" id="delete-job" onclick="delete_job(this)" data-id="'+j[i].id+'">Pašalinti</span>');
             }
-            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-company">' + j[i].company + '</div><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div><div class="offer-right offer-right-inactive"><div class="offer-gauge"></div><div class="offer-walktime"><img src="https://camo.githubusercontent.com/a771824a60b7024060bd0970d06e9aa5c1e2bdd0/68747470733a2f2f662e636c6f75642e6769746875622e636f6d2f6173736574732f3133333031362f3536343239372f63386430333463322d633535322d313165322d383764322d3430366638353630646234362e706e67" width="12">— min.</div></div></a>');
+            list.append('<li><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+j[i].url+'" target="_blank" class="link--offer clearfix" title="Parodyti darbo skelbimą - ' + j[i].title + '"><div class="offer-logo"><img src="'+CVMaps.paths.i()+'l/' + j[i].logo + '" width="74"></div><div class="offer-content"><h5>' + j[i].title + '</h5><div class="offer-salary">' + (salary.length > 3 ? salary : "") + '</div></div></div></a>');
 
             list.append('</li>');
         }
@@ -139,21 +139,17 @@ function initList2() {
 
 function initMap() {
     notification("loading","Paruošiamas žėmelapis");
-var cvMapsStyle=new google.maps.StyledMapType([{"featureType":"administrative","elementType":"labels.text.fill","stylers":[{"color":"#444444"}]},{"featureType":"landscape","elementType":"all","stylers":[{"color":"#f2f2f2"}]},{"featureType":"poi","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"road","elementType":"all","stylers":[{"saturation":-100},{"lightness":45}]},{"featureType":"road.highway","elementType":"all","stylers":[{"visibility":"simplified"}]},{"featureType":"road.arterial","elementType":"labels.icon","stylers":[{"visibility":"off"}]},{"featureType":"transit","elementType":"all","stylers":[{"visibility":"off"}]},{"featureType":"water","elementType":"all","stylers":[{"color":"#c0e4f3"},{"visibility":"on"}]}],{name:"CV Maps"});
 
 	map = new google.maps.Map(document.getElementById('map'), {
 		center: {lat: 54.694988, lng: 25.278570},
 		zoom: 12,
 		mapTypeControl: false,
         mapTypeControlOptions: {
-            mapTypeIds: [google.maps.MapTypeId.ROADMAP, 'cvmapsstyle']
+            mapTypeIds: [google.maps.MapTypeId.ROADMAP]
         }
 	});
 
     initSearchBox();
-
-	map.mapTypes.set('cvmapsstyle', cvMapsStyle);
-    map.setMapTypeId('cvmapsstyle');
 
 	renderMarkers();
 
@@ -169,7 +165,7 @@ var cvMapsStyle=new google.maps.StyledMapType([{"featureType":"administrative","
 }
 
 function initSearchBox(){
-    var input = document.getElementById('pac-input');
+    var input = document.getElementById('autocomplete');
     var options = {componentRestrictions: {country: 'lt'}};
     var searchBox = new google.maps.places.SearchBox(input,options);
     map.addListener('bounds_changed', function() {
@@ -333,17 +329,17 @@ function renderMarkers(){
     notification("loading","Vyksta darboviečių atvaizdavimas");
     var infoWindow = new google.maps.InfoWindow(),
         image = CVMaps.paths.i() + "marker_plus.png";
-
+    var clicked = false;
 	for(var i=0; i<c.length; i++){
         if(typeof c[i].s !== "undefined"){
 			if(c[i].s === "self"){
 				image = {
                     path: google.maps.SymbolPath.CIRCLE,
                     scale: 7,
-                    strokeColor: '#8bc34a',
+                    strokeColor: '#33658a',
                     strokeOpacity: 0.2,
                     strokeWeight: 12,
-                    fillColor: '#8bc34a',
+                    fillColor: '#33658a',
                     fillOpacity: 1
                 };
 			} else {
@@ -362,9 +358,19 @@ function renderMarkers(){
                 job_id: job_id
 			});
 
-			google.maps.event.addListener(marker, 'click', (function(marker, i) {
-	            return function() {
+            google.maps.event.addListener(map, 'click', (function(marker) {
+                return function() {
+
+                        infoWindow.close(map, marker);
+
+
+                }
+            })(marker));
+
+            google.maps.event.addListener(marker, 'mouseover', (function(marker, i) {
+                return function() {
                     var content = '', salary = '';
+                    clicked = false;
                     $.ajax({
                         type: "GET",
                         url: CVMaps.paths.h,
@@ -383,7 +389,7 @@ function renderMarkers(){
                                     ids.push(c[i].s[j]);
                                 }
 
-                                 $.ajax({
+                                $.ajax({
                                     type: "GET",
                                     url: CVMaps.paths.h,
                                     data: {
@@ -391,7 +397,7 @@ function renderMarkers(){
                                         m: "get_jobs",
                                         ids: ids
                                     },
-                                     success: function(response) {
+                                    success: function(response) {
                                         content += '<ul class="infoWindow_list">';
                                         $.each( response, function( key, val ) {
                                             salary = salaryToString(response,key);
@@ -411,17 +417,17 @@ function renderMarkers(){
                                         infoWindow.open(map, marker);
                                     }
 
-                                 });
+                                });
                             } else {
-                                content += response[0].title+'<div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div><a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+c[i].u+'" target="_blank" class="m-button">Parodyti skelbimą</a>';
+                                content += '<a href="'+CVMaps.paths.h+'?c=q&m=redirect&u='+c[i].u+'" target="_blank" class="m-title">'+response[0].title+'</a><div class="m-company">'+response[0].company+'</div><div class="m-price">'+(salary.length > 3 ? salary : "")+'</div>';
 
                                 infoWindow.setContent(content);
                                 infoWindow.open(map, marker);
                             }
                         }
                     });
-	            }
-	        })(marker, i));
+                }
+            })(marker, i));
 			markers.push(marker);
 
 		}
@@ -512,6 +518,7 @@ function placeMarkerAndPanTo(latLng, map) {
 
     var marker = new google.maps.Marker({
         position: {lat:latLng.lat() , lng:latLng.lng()},
+        icon: CVMaps.paths.i() + "homemarker.png",
         draggable:true,
         map: map
     });
